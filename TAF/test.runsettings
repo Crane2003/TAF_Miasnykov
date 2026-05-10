@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RunSettings>
+  <RunConfiguration>
+    <MaxCpuCount>1</MaxCpuCount>
+    <ResultsDirectory>.\TestResults</ResultsDirectory>
+    <TargetFramework>net10.0</TargetFramework>
+  </RunConfiguration>
+
+  <NUnit>
+    <NumberOfTestWorkers>1</NumberOfTestWorkers>
+    <DefaultTimeout>60000</DefaultTimeout>
+  </NUnit>
+
+  <LoggerRunSettings>
+    <Loggers>
+      <Logger friendlyName="console" enabled="True" />
+      <Logger friendlyName="trx" enabled="True">
+        <Configuration>
+          <LogFileName>testresults.trx</LogFileName>
+        </Configuration>
+      </Logger>
+      <Logger friendlyName="html" enabled="True">
+        <Configuration>
+          <LogFileName>testresults.html</LogFileName>
+        </Configuration>
+      </Logger>
+    </Loggers>
+  </LoggerRunSettings>
+</RunSettings>
