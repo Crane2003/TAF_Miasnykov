@@ -7,11 +7,14 @@ namespace TAF.Business.Services;
 public class DashboardApiService
 {
     private readonly ApiClient _apiClient;
+    private readonly ILogger _logger;
     private Dictionary<string, string>? _authHeaders;
 
     public DashboardApiService(string baseUrl)
     {
         _apiClient = new ApiClient(baseUrl);
+        _logger = Log.ForContext<DashboardApiService>();
+        _logger.Information("DashboardApiService initialized");
     }
 
     public void SetAuthToken(string token)
@@ -20,24 +23,29 @@ public class DashboardApiService
         {
             { "Authorization", $"Bearer {token}" }
         };
+        _logger.Debug("Authorization token set");
     }
 
     public async Task<(bool Success, Dashboard? Dashboard, string Message)> CreateDashboardAsync(Dashboard dashboard)
     {
         try
         {
+            _logger.Information("Creating dashboard: {DashboardName}", dashboard.Name);
             var response = await _apiClient.ExecutePostAsync(ApiEndpoints.Dashboards, dashboard, _authHeaders);
 
             if (response.IsSuccessful && response.Content != null)
             {
                 var createdDashboard = JsonConvert.DeserializeObject<Dashboard>(response.Content);
+                _logger.Information("Dashboard created successfully: {DashboardId}", createdDashboard?.Id);
                 return (true, createdDashboard, "Dashboard created successfully");
             }
 
+            _logger.Warning("Failed to create dashboard: {ErrorMessage}", response.ErrorMessage);
             return (false, null, response.ErrorMessage ?? "Failed to create dashboard");
         }
         catch (Exception ex)
         {
+            _logger.Error(ex, "Exception occurred while creating dashboard");
             return (false, null, ex.Message);
         }
     }
@@ -46,6 +54,7 @@ public class DashboardApiService
     {
         try
         {
+            _logger.Debug("Fetching dashboard: {DashboardId}", dashboardId);
             var response = await _apiClient.ExecuteGetAsync(ApiEndpoints.GetDashboardById(dashboardId), _authHeaders);
 
             if (response.IsSuccessful && response.Content != null)

@@ -22,23 +22,34 @@ public class LoginPage : BasePage
 
     public void Login(string username, string password)
     {
+        _logger.Information("Attempting login with username: {Username}", username);
         _usernameField.EnterText(username);
         _passwordField.EnterText(password);
         _loginButton.Click();
+        _logger.Debug("Login credentials submitted");
     }
 
     public bool IsErrorMessageDisplayed()
     {
-        return _errorMessage.IsDisplayed();
+        var isDisplayed = _errorMessage.IsDisplayed();
+        if (isDisplayed)
+        {
+            _logger.Warning("Login error message displayed");
+        }
+        return isDisplayed;
     }
 
     public string GetErrorMessage()
     {
-        return _errorMessage.GetText();
+        var message = _errorMessage.GetText();
+        _logger.Debug("Error message text: {ErrorMessage}", message);
+        return message;
     }
 
     public override bool IsPageLoaded()
     {
-        return _loginButton.IsDisplayed() && GetCurrentUrl().Contains("#login");
+        var isLoaded = _loginButton.IsDisplayed() && GetCurrentUrl().Contains("#login");
+        _logger.Debug("Login page loaded: {IsLoaded}", isLoaded);
+        return isLoaded;
     }
 }
