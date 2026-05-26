@@ -1,5 +1,4 @@
 using Newtonsoft.Json;
-using Serilog;
 using TAF.Business.Models;
 using TAF.Core.Api;
 

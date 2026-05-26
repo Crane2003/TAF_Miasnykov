@@ -2,7 +2,6 @@ using TAF.Core.Configuration;
 using TAF.Core.Driver;
 using TAF.Core.Logging;
 using TAF.Core.Utilities;
-using Serilog;
 
 namespace TAF.Tests.Base;
 
@@ -24,7 +23,7 @@ public class BaseTest
         Credentials = configLoader.GetCredentials();
         ApiConfiguration = configLoader.GetApiConfiguration();
 
-        Logger.Information("Test configuration loaded: BaseUrl={BaseUrl}, Browser={Browser}", 
+        Logger.Information("Test configuration loaded: BaseUrl={BaseUrl}, Browser={Browser}",
             Configuration.BaseUrl, Configuration.Browser);
     }
 
@@ -46,7 +45,7 @@ public class BaseTest
 
         if (TestContext.CurrentContext.Result.Outcome.Status == NUnit.Framework.Interfaces.TestStatus.Failed)
         {
-            Logger.Error("Test failed: {TestName} - Message: {ErrorMessage}", 
+            Logger.Error("Test failed: {TestName} - Message: {ErrorMessage}",
                 testName, TestContext.CurrentContext.Result.Message);
 
             if (Configuration.TakeScreenshotOnFailure)

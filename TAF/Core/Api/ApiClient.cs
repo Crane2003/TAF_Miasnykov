@@ -1,5 +1,4 @@
 using RestSharp;
-using Serilog;
 
 namespace TAF.Core.Api;
 
