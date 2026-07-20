@@ -1,3 +1,5 @@
 <Solution>
-  <Project Path="TAF/TAF.csproj" />
+  <Project Path="Business/Business.csproj" Id="76c6250f-29b0-4fdf-9cfa-c4ad05f486d6" />
+  <Project Path="Core/Core.csproj" Id="dc44d77c-ee0b-402b-8d8f-20b156006df7" />
+  <Project Path="Tests/Tests.csproj" Id="f17edb63-70f0-4b73-b76d-05c9917462b0" />
 </Solution>
