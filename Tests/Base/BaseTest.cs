@@ -32,7 +32,7 @@ public class BaseTest
     }
 
     [TearDown]
-    public void TearDown()
+    public virtual void TearDown()
     {
         var testName = TestContext.CurrentContext.Test.Name;
         var testStatus = TestContext.CurrentContext.Result.Outcome.Status;
@@ -49,6 +49,5 @@ public class BaseTest
     public void OneTimeTearDown()
     {
         Logger.Information("Test execution completed");
-        LoggerSetup.CloseAndFlush();
     }
 }

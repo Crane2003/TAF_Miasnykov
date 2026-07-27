@@ -23,6 +23,7 @@ public static class LoggerSetup
                 retainedFileCountLimit: 7)
             .CreateLogger();
 
+        AppDomain.CurrentDomain.ProcessExit += (_, _) => Log.CloseAndFlush();
         Log.Information("Logger initialized successfully");
     }
 
