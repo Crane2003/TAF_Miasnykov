@@ -87,7 +87,6 @@ public sealed class DashboardHooks
         }
 
         var status = _scenarioContext.ScenarioExecutionStatus;
-        logger.Information("[BDD Scenario] Finished: {Scenario} — {Status}",
-            _scenarioContext.ScenarioInfo.Title, status);
+        logger.Information("[BDD Scenario] Finished: {Scenario} — {Status}", _scenarioContext.ScenarioInfo.Title, status);
     }
 }
