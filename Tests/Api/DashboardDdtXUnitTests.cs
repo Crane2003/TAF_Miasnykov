@@ -1,5 +1,6 @@
 using Business.Models;
 using Business.Services;
+using Core.Utilities;
 using Tests.Base;
 using Tests.TestData;
 using Xunit;
@@ -64,6 +65,16 @@ public class DashboardDdtXUnitTests : XUnitBaseTest, IAsyncLifetime, IClassFixtu
     [MemberData(nameof(XUnitTestDataAdapter.WidgetCases), MemberType = typeof(XUnitTestDataAdapter))]
     public async Task AddWidget_WithVariousConfigurations_ShouldBeStoredCorrectly(Widget widget)
     {
+        // Widget names are unique per project, and the case data is shared between
+        // fixtures, so work against a uniquely named copy.
+        widget = new Widget
+        {
+            Name = widget.Name.Unique(),
+            Type = widget.Type,
+            Size = widget.Size,
+            Position = widget.Position
+        };
+
         var createRequest = DashboardCreateRequest.CreateDefault();
         var dashboard = await _dashboardApiService.CreateDashboardAsync(createRequest);
         Assert.NotNull(dashboard);

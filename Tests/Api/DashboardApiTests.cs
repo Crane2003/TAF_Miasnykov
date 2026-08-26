@@ -34,12 +34,12 @@ public class DashboardApiTests : BaseTest
         var result = await _dashboardApiService.CreateDashboardAsync(request);
 
         Assert.That(result, Is.Not.Null);
-        Assert.Multiple(() =>
+        using (Assert.EnterMultipleScope())
         {
             Assert.That(result.Id, Is.GreaterThan(0));
             Assert.That(result.Name, Is.EqualTo(request.Name));
             Assert.That(result.Description, Is.EqualTo(request.Description));
-        });
+        }
 
         _createdDashboardId = result!.Id;
     }
@@ -51,20 +51,21 @@ public class DashboardApiTests : BaseTest
         var createResult = await _dashboardApiService.CreateDashboardAsync(request);
         _createdDashboardId = createResult!.Id;
 
+        var updatedName = $"Updated Dashboard Name {Guid.NewGuid()}";
         var updateRequest = new DashboardUpdateRequest
         {
-            Name = "Updated Dashboard Name",
+            Name = updatedName,
             Description = "Updated description"
         };
 
         var updateResult = await _dashboardApiService.UpdateDashboardAsync(createResult.Id, updateRequest);
 
         Assert.That(updateResult, Is.Not.Null);
-        Assert.Multiple(() =>
+        using (Assert.EnterMultipleScope())
         {
-            Assert.That(updateResult.Name, Is.EqualTo("Updated Dashboard Name"));
+            Assert.That(updateResult.Name, Is.EqualTo(updatedName));
             Assert.That(updateResult.Description, Is.EqualTo("Updated description"));
-        });
+        }
     }
 
     [Test]
@@ -74,12 +75,12 @@ public class DashboardApiTests : BaseTest
         var createResult = await _dashboardApiService.CreateDashboardAsync(request);
         _createdDashboardId = createResult!.Id;
 
-        var widget = Widget.CreateChartWidget("Test Chart Widget", 0, 0);
+        var widget = Widget.CreateChartWidget($"Test Chart Widget {Guid.NewGuid()}", 0, 0);
         var addWidgetResult = await _dashboardApiService.AddWidgetToDashboardAsync(createResult.Id, widget);
 
         Assert.That(addWidgetResult, Is.Not.Null);
         Assert.That(addWidgetResult!.GetWidgetCount(), Is.EqualTo(1));
-        Assert.That(addWidgetResult.Widgets[0].Name, Is.EqualTo("Test Chart Widget"));
+        Assert.That(addWidgetResult.Widgets[0].Name, Is.EqualTo(widget.Name));
     }
 
     [Test]
@@ -89,8 +90,8 @@ public class DashboardApiTests : BaseTest
         var createResult = await _dashboardApiService.CreateDashboardAsync(request);
         _createdDashboardId = createResult!.Id;
 
-        var widget1 = Widget.CreateChartWidget("Widget 1", 0, 0);
-        var widget2 = Widget.CreateChartWidget("Widget 2", 1, 0);
+        var widget1 = Widget.CreateChartWidget($"Widget 1 {Guid.NewGuid()}", 0, 0);
+        var widget2 = Widget.CreateChartWidget($"Widget 2 {Guid.NewGuid()}", 1, 0);
         await _dashboardApiService.AddWidgetToDashboardAsync(createResult.Id, widget1);
         var addResult = await _dashboardApiService.AddWidgetToDashboardAsync(createResult.Id, widget2);
 
@@ -110,7 +111,8 @@ public class DashboardApiTests : BaseTest
     {
         var request = DashboardCreateRequest.CreateDefault();
         var createResult = await _dashboardApiService.CreateDashboardAsync(request);
-        var dashboardId = createResult!.Id;
+        Assert.That(createResult, Is.Not.Null);
+        var dashboardId = createResult.Id;
 
         var deleted = await _dashboardApiService.DeleteDashboardAsync(dashboardId);
         Assert.That(deleted, Is.True);

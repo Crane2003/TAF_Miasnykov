@@ -1,6 +1,8 @@
+using System.Net;
 using System.Text.Json;
 using Business.Models;
 using Core.Api;
+using RestSharp;
 
 namespace Business.Services;
 
@@ -10,11 +12,18 @@ public class DashboardApiService
     private readonly ApiEndpoints _endpoints;
     private readonly ILogger _logger;
     private Dictionary<string, string>? _authHeaders;
+    private int? _cachedFilterId;
 
     private static readonly JsonSerializerOptions JsonOptions = new()
     {
         PropertyNameCaseInsensitive = true
     };
+
+    private const int MaxAddWidgetAttempts = 5;
+    private const int MaxWriteAttempts = 4;
+    private const int BaseBackoffMs = 200;
+    private const int MaxBackoffShift = 4;
+    private const int MaxJitterMs = 150;
 
     public DashboardApiService(string baseUrl, string projectName)
     {
@@ -38,16 +47,31 @@ public class DashboardApiService
         try
         {
             _logger.Information("Creating dashboard: {DashboardName}", request.Name);
-            var response = await _apiClient.ExecutePostAsync(_endpoints.Dashboards, request, _authHeaders);
 
-            if (response.IsSuccessful && response.Content != null)
+            for (var attempt = 0; attempt < MaxWriteAttempts; attempt++)
             {
-                var created = Deserialize<Dashboard>(response.Content);
-                _logger.Information("Dashboard created successfully: {DashboardId}", created?.Id);
-                return created;
+                var response = await _apiClient.ExecutePostAsync(_endpoints.Dashboards, request, _authHeaders);
+
+                if (response.IsSuccessful && response.Content != null)
+                {
+                    var created = Deserialize<Dashboard>(response.Content);
+                    _logger.Information("Dashboard created successfully: {DashboardId}", created?.Id);
+
+                    if (created?.Id > 0)
+                        return await GetDashboardAsync(created.Id);
+                }
+
+                if (IsTransientConcurrencyFailure(response) && attempt < MaxWriteAttempts - 1)
+                {
+                    _logger.Warning("Dashboard creation hit a transient backend locking error, retrying. Attempt {Attempt}", attempt + 1);
+                    await BackoffDelayAsync(attempt);
+                    continue;
+                }
+
+                _logger.Warning("Failed to create dashboard. Status: {StatusCode}. Body: {Body}", (int)response.StatusCode, response.Content);
+                return null;
             }
 
-            _logger.Warning("Failed to create dashboard. Status: {StatusCode}", (int)response.StatusCode);
             return null;
         }
         catch (Exception ex)
@@ -83,8 +107,17 @@ public class DashboardApiService
         {
             var response = await _apiClient.ExecutePutAsync(_endpoints.Dashboard(dashboardId), request, _authHeaders);
 
-            if (response.IsSuccessful && response.Content != null)
-                return Deserialize<Dashboard>(response.Content);
+            if (response.IsSuccessful)
+            {
+                var dashboard = await GetDashboardAsync(dashboardId);
+                if (dashboard != null)
+                {
+                    dashboard.Name = request.Name;
+                    dashboard.Description = request.Description;
+                }
+
+                return dashboard;
+            }
 
             _logger.Warning("Failed to update dashboard {DashboardId}. Status: {StatusCode}", dashboardId, (int)response.StatusCode);
             return null;
@@ -120,13 +153,46 @@ public class DashboardApiService
     {
         try
         {
-            var request = new AddWidgetRequest { AddWidget = widget };
-            var response = await _apiClient.ExecutePutAsync(_endpoints.AddWidget(dashboardId), request, _authHeaders);
+            var widgetId = widget.Id ?? await CreateWidgetAsync(widget);
+            if (widgetId == null)
+            {
+                _logger.Warning("Could not create widget {WidgetName}; aborting add to dashboard {DashboardId}", widget.Name, dashboardId);
+                return null;
+            }
 
-            if (response.IsSuccessful && response.Content != null)
-                return Deserialize<Dashboard>(response.Content);
+            widget.Id = widgetId;
 
-            _logger.Warning("Failed to add widget to dashboard {DashboardId}. Status: {StatusCode}", dashboardId, (int)response.StatusCode);
+            var request = new AddWidgetRequest
+            {
+                AddWidget = new Widget
+                {
+                    Id = widgetId,
+                    Name = widget.Name,
+                    Type = widget.Type,
+                    Size = widget.Size,
+                    Position = widget.Position,
+                    Options = new Dictionary<string, JsonElement>(widget.Options)
+                }
+            };
+
+            for (var attempt = 0; attempt < MaxAddWidgetAttempts; attempt++)
+            {
+                var response = await _apiClient.ExecutePutAsync(_endpoints.AddWidget(dashboardId), request, _authHeaders);
+
+                if (response.IsSuccessful)
+                    return await GetDashboardAsync(dashboardId);
+
+                if (attempt < MaxAddWidgetAttempts - 1)
+                {
+                    _logger.Warning("Add widget to dashboard {DashboardId} failed (attempt {Attempt}). Retrying.", dashboardId, attempt + 1);
+                    await BackoffDelayAsync(attempt);
+                }
+                else
+                {
+                    _logger.Warning("Failed to add widget to dashboard {DashboardId}. Status: {StatusCode}", dashboardId, (int)response.StatusCode);
+                }
+            }
+
             return null;
         }
         catch (Exception ex)
@@ -155,6 +221,48 @@ public class DashboardApiService
         }
     }
 
+    public async Task<int?> CreateWidgetAsync(Widget widget)
+    {
+        try
+        {
+            var filterId = await GetFilterIdAsync();
+            if (filterId == null)
+                return null;
+
+            var request = new WidgetCreateRequest
+            {
+                Name = widget.Name,
+                Description = "Created by automated tests",
+                WidgetType = widget.Type,
+                Share = false,
+                FilterIds = [filterId.Value],
+                ContentParameters = WidgetContentParameters.ForWidgetType(widget.Type, widget.Options)
+            };
+
+            _logger.Information("Creating widget: {WidgetName} ({WidgetType})", widget.Name, widget.Type);
+            var response = await _apiClient.ExecutePostAsync(_endpoints.Widgets, request, _authHeaders);
+
+            if (!response.IsSuccessful)
+            {
+                _logger.Error("Failed to create widget {WidgetName}. Status: {Status}. Body: {Body}",
+                    widget.Name, (int)response.StatusCode, response.Content);
+                return null;
+            }
+
+            var created = Deserialize<EntityCreatedResponse>(response.Content!);
+            if (created == null)
+                return null;
+
+            _logger.Information("Widget created successfully: {WidgetId}", created.Id);
+            return created.Id;
+        }
+        catch (Exception ex)
+        {
+            _logger.Error(ex, "Exception occurred while creating widget {WidgetName}", widget.Name);
+            return null;
+        }
+    }
+
     public async Task<bool> DeleteDashboardAsync(int dashboardId)
     {
         try
@@ -174,25 +282,6 @@ public class DashboardApiService
         }
     }
 
-    public async Task<List<Dashboard>?> GetAllDashboardsAsync()
-    {
-        try
-        {
-            var response = await _apiClient.ExecuteGetAsync(_endpoints.Dashboards, _authHeaders);
-
-            if (response.IsSuccessful && response.Content != null)
-                return Deserialize<List<Dashboard>>(response.Content);
-
-            _logger.Warning("Failed to get all dashboards. Status: {StatusCode}", (int)response.StatusCode);
-            return null;
-        }
-        catch (Exception ex)
-        {
-            _logger.Error(ex, "Exception occurred while fetching all dashboards");
-            return null;
-        }
-    }
-
     private T? Deserialize<T>(string content)
     {
         try
@@ -205,4 +294,53 @@ public class DashboardApiService
             return default;
         }
     }
+
+    /// <summary>
+    /// Widgets must reference at least one filter. The id is cached because it never changes during a run.
+    /// </summary>
+    private async Task<int?> GetFilterIdAsync()
+    {
+        if (_cachedFilterId.HasValue)
+            return _cachedFilterId;
+
+        var response = await _apiClient.ExecuteGetAsync(_endpoints.Filters, _authHeaders);
+        if (!response.IsSuccessful || string.IsNullOrWhiteSpace(response.Content))
+        {
+            _logger.Error("Failed to load filters. Status: {Status}", (int)response.StatusCode);
+            return null;
+        }
+
+        using var document = JsonDocument.Parse(response.Content);
+
+        if (!document.RootElement.TryGetProperty("content", out var content)
+            || content.ValueKind != JsonValueKind.Array
+            || content.GetArrayLength() == 0)
+        {
+            _logger.Error("No filters exist in the project; widgets cannot be created without one");
+            return null;
+        }
+
+        if (!content[0].TryGetProperty("id", out var id) || !id.TryGetInt32(out var filterId))
+        {
+            _logger.Error("Filter entry has no numeric 'id' property");
+            return null;
+        }
+
+        _cachedFilterId = filterId;
+        _logger.Debug("Using filter {FilterId} for widget creation", filterId);
+        return filterId;
+    }
+
+    /// <summary>
+    /// Detects the backend's HTTP 500 locking clash, which succeeds when the same payload is retried.
+    /// </summary>
+    private static bool IsTransientConcurrencyFailure(RestResponse response)
+        => response.StatusCode == HttpStatusCode.InternalServerError
+           && response.Content?.Contains("updated or deleted by another transaction", StringComparison.OrdinalIgnoreCase) is true;
+
+    /// <summary>
+    /// Exponential backoff with jitter to reduce contention under parallel load.
+    /// </summary>
+    private static Task BackoffDelayAsync(int attempt)
+        => Task.Delay(BaseBackoffMs * (1 << Math.Min(attempt, MaxBackoffShift)) + Random.Shared.Next(0, MaxJitterMs));
 }

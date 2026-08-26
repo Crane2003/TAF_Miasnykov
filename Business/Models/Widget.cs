@@ -52,7 +52,7 @@ public class Widget
         return new Widget
         {
             Name = name,
-            Type = "chart",
+            Type = "statisticTrend",
             Size = new WidgetSize { Width = 6, Height = 4 },
             Position = new WidgetPosition { PositionX = positionX, PositionY = positionY }
         };
@@ -63,7 +63,7 @@ public class Widget
         return new Widget
         {
             Name = name,
-            Type = "table",
+            Type = "launchesTable",
             Size = new WidgetSize { Width = 12, Height = 6 },
             Position = new WidgetPosition { PositionX = positionX, PositionY = positionY }
         };

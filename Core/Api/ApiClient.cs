@@ -15,10 +15,19 @@ public class ApiClient
         {
             Timeout = TimeSpan.FromSeconds(30)
         };
+
+        if (IsLoopback(baseUrl))
+        {
+            options.RemoteCertificateValidationCallback = (_, _, _, _) => true;
+        }
+
         _client = new RestClient(options);
 
         _logger.Information("ApiClient initialized with base URL: {BaseUrl}", baseUrl);
     }
+
+    private static bool IsLoopback(string baseUrl)
+        => Uri.TryCreate(baseUrl, UriKind.Absolute, out var uri) && uri.IsLoopback;
 
     public async Task<RestResponse> ExecuteGetAsync(string endpoint, Dictionary<string, string>? headers = null)
         => await ExecuteAsync(endpoint, Method.Get, null, headers);
