@@ -15,8 +15,7 @@ public class DashboardE2ETests : UiBaseTest
     [SetUp]
     public void InitServices()
     {
-        _apiService = new DashboardApiService(ApiConfiguration.BaseUrl, Configuration.ProjectName);
-        _apiService.SetAuthToken(ApiConfiguration.AuthToken);
+        _apiService = new DashboardApiService(Configuration.ProjectName);
         _uiService = new DashboardUiService(Configuration.BaseUrl);
         _authService = new AuthenticationService(Configuration.BaseUrl);
         _createdDashboardId = null;

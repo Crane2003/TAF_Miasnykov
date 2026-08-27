@@ -22,8 +22,7 @@ public class DashboardE2EXUnitTests : XUnitUiBaseTest, IAsyncLifetime, IClassFix
         await base.InitializeAsync();
         try
         {
-            _apiService = new DashboardApiService(ApiConfiguration.BaseUrl, Configuration.ProjectName);
-            _apiService.SetAuthToken(ApiConfiguration.AuthToken);
+            _apiService = new DashboardApiService(Configuration.ProjectName);
             _uiService = new DashboardUiService(Configuration.BaseUrl);
             _authService = new AuthenticationService(Configuration.BaseUrl);
             _createdDashboardId = null;

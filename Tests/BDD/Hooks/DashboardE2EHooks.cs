@@ -47,13 +47,11 @@ public sealed class DashboardE2EHooks
 
         var configLoader = ConfigurationLoader.Instance;
         var testConfig = configLoader.GetTestConfiguration();
-        var apiConfig = configLoader.GetApiConfiguration();
         var credentials = configLoader.GetCredentials();
 
         UiTestSupport.InitDriver(testConfig);
 
-        _e2eContext.ApiService = new DashboardApiService(apiConfig.BaseUrl, testConfig.ProjectName);
-        _e2eContext.ApiService.SetAuthToken(apiConfig.AuthToken);
+        _e2eContext.ApiService = new DashboardApiService(testConfig.ProjectName);
         _e2eContext.UiService = new DashboardUiService(testConfig.BaseUrl);
         _e2eContext.AuthService = new AuthenticationService(testConfig.BaseUrl);
 

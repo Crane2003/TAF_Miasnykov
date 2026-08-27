@@ -11,7 +11,6 @@ public class DashboardApiService
     private readonly ApiClient _apiClient;
     private readonly ApiEndpoints _endpoints;
     private readonly ILogger _logger;
-    private Dictionary<string, string>? _authHeaders;
     private int? _cachedFilterId;
 
     private static readonly JsonSerializerOptions JsonOptions = new()
@@ -25,21 +24,12 @@ public class DashboardApiService
     private const int MaxBackoffShift = 4;
     private const int MaxJitterMs = 150;
 
-    public DashboardApiService(string baseUrl, string projectName)
+    public DashboardApiService(string projectName)
     {
-        _apiClient = new ApiClient(baseUrl);
+        _apiClient = new ApiClient();
         _endpoints = new ApiEndpoints(projectName);
         _logger = Log.ForContext<DashboardApiService>();
         _logger.Information("DashboardApiService initialized for project: {ProjectName}", projectName);
-    }
-
-    public void SetAuthToken(string token)
-    {
-        _authHeaders = new Dictionary<string, string>
-        {
-            { "Authorization", $"Bearer {token}" }
-        };
-        _logger.Debug("Authorization token set");
     }
 
     public async Task<Dashboard?> CreateDashboardAsync(DashboardCreateRequest request)
@@ -50,21 +40,21 @@ public class DashboardApiService
 
             for (var attempt = 0; attempt < MaxWriteAttempts; attempt++)
             {
-                var response = await _apiClient.ExecutePostAsync(_endpoints.Dashboards, request, _authHeaders);
+                var response = await _apiClient.ExecutePostAsync(_endpoints.Dashboards, request);
 
                 if (response.IsSuccessful && response.Content != null)
                 {
                     var created = Deserialize<Dashboard>(response.Content);
                     _logger.Information("Dashboard created successfully: {DashboardId}", created?.Id);
 
-                    if (created?.Id > 0)
-                        return await GetDashboardAsync(created.Id);
+                    if (created?.Id > 0) return await GetDashboardAsync(created.Id);
                 }
 
                 if (IsTransientConcurrencyFailure(response) && attempt < MaxWriteAttempts - 1)
                 {
                     _logger.Warning("Dashboard creation hit a transient backend locking error, retrying. Attempt {Attempt}", attempt + 1);
                     await BackoffDelayAsync(attempt);
+
                     continue;
                 }
 
@@ -86,7 +76,7 @@ public class DashboardApiService
         try
         {
             _logger.Debug("Fetching dashboard: {DashboardId}", dashboardId);
-            var response = await _apiClient.ExecuteGetAsync(_endpoints.Dashboard(dashboardId), _authHeaders);
+            var response = await _apiClient.ExecuteGetAsync(_endpoints.Dashboard(dashboardId));
 
             if (response.IsSuccessful && response.Content != null)
                 return Deserialize<Dashboard>(response.Content);
@@ -105,19 +95,10 @@ public class DashboardApiService
     {
         try
         {
-            var response = await _apiClient.ExecutePutAsync(_endpoints.Dashboard(dashboardId), request, _authHeaders);
+            var response = await _apiClient.ExecutePutAsync(_endpoints.Dashboard(dashboardId), request);
 
             if (response.IsSuccessful)
-            {
-                var dashboard = await GetDashboardAsync(dashboardId);
-                if (dashboard != null)
-                {
-                    dashboard.Name = request.Name;
-                    dashboard.Description = request.Description;
-                }
-
-                return dashboard;
-            }
+                return await GetDashboardAsync(dashboardId);
 
             _logger.Warning("Failed to update dashboard {DashboardId}. Status: {StatusCode}", dashboardId, (int)response.StatusCode);
             return null;
@@ -134,7 +115,7 @@ public class DashboardApiService
         try
         {
             var request = new DashboardLockRequest { Locked = locked };
-            var response = await _apiClient.ExecutePatchAsync(_endpoints.Dashboard(dashboardId), request, _authHeaders);
+            var response = await _apiClient.ExecutePatchAsync(_endpoints.Dashboard(dashboardId), request);
 
             if (response.IsSuccessful)
                 return true;
@@ -149,10 +130,16 @@ public class DashboardApiService
         }
     }
 
+    /// <summary>
+    /// Attaching a widget takes two calls: the widget entity is created first via POST /widget,
+    /// then linked by id via PUT /dashboard/{id}/add, which only accepts an existing widget and
+    /// rejects a null widgetId.
+    /// </summary>
     public async Task<Dashboard?> AddWidgetToDashboardAsync(int dashboardId, Widget widget)
     {
         try
         {
+            // Reuse the widget when it already exists in the project; otherwise create it to obtain an id.
             var widgetId = widget.Id ?? await CreateWidgetAsync(widget);
             if (widgetId == null)
             {
@@ -162,6 +149,8 @@ public class DashboardApiService
 
             widget.Id = widgetId;
 
+            // Build the payload from a copy: widget instances often come from shared test data,
+            // so the request must not hold a reference to a case object other tests reuse.
             var request = new AddWidgetRequest
             {
                 AddWidget = new Widget
@@ -175,9 +164,10 @@ public class DashboardApiService
                 }
             };
 
+            // The link step is retried because the backend intermittently rejects it under parallel load
             for (var attempt = 0; attempt < MaxAddWidgetAttempts; attempt++)
             {
-                var response = await _apiClient.ExecutePutAsync(_endpoints.AddWidget(dashboardId), request, _authHeaders);
+                var response = await _apiClient.ExecutePutAsync(_endpoints.AddWidget(dashboardId), request);
 
                 if (response.IsSuccessful)
                     return await GetDashboardAsync(dashboardId);
@@ -206,7 +196,7 @@ public class DashboardApiService
     {
         try
         {
-            var response = await _apiClient.ExecuteDeleteAsync(_endpoints.Widget(dashboardId, widgetId), _authHeaders);
+            var response = await _apiClient.ExecuteDeleteAsync(_endpoints.Widget(dashboardId, widgetId));
 
             if (response.IsSuccessful)
                 return true;
@@ -240,7 +230,7 @@ public class DashboardApiService
             };
 
             _logger.Information("Creating widget: {WidgetName} ({WidgetType})", widget.Name, widget.Type);
-            var response = await _apiClient.ExecutePostAsync(_endpoints.Widgets, request, _authHeaders);
+            var response = await _apiClient.ExecutePostAsync(_endpoints.Widgets, request);
 
             if (!response.IsSuccessful)
             {
@@ -267,7 +257,7 @@ public class DashboardApiService
     {
         try
         {
-            var response = await _apiClient.ExecuteDeleteAsync(_endpoints.Dashboard(dashboardId), _authHeaders);
+            var response = await _apiClient.ExecuteDeleteAsync(_endpoints.Dashboard(dashboardId));
 
             if (response.IsSuccessful)
                 return true;
@@ -303,7 +293,7 @@ public class DashboardApiService
         if (_cachedFilterId.HasValue)
             return _cachedFilterId;
 
-        var response = await _apiClient.ExecuteGetAsync(_endpoints.Filters, _authHeaders);
+        var response = await _apiClient.ExecuteGetAsync(_endpoints.Filters);
         if (!response.IsSuccessful || string.IsNullOrWhiteSpace(response.Content))
         {
             _logger.Error("Failed to load filters. Status: {Status}", (int)response.StatusCode);
@@ -311,20 +301,7 @@ public class DashboardApiService
         }
 
         using var document = JsonDocument.Parse(response.Content);
-
-        if (!document.RootElement.TryGetProperty("content", out var content)
-            || content.ValueKind != JsonValueKind.Array
-            || content.GetArrayLength() == 0)
-        {
-            _logger.Error("No filters exist in the project; widgets cannot be created without one");
-            return null;
-        }
-
-        if (!content[0].TryGetProperty("id", out var id) || !id.TryGetInt32(out var filterId))
-        {
-            _logger.Error("Filter entry has no numeric 'id' property");
-            return null;
-        }
+        var filterId = document.RootElement.GetProperty("content")[0].GetProperty("id").GetInt32();
 
         _cachedFilterId = filterId;
         _logger.Debug("Using filter {FilterId} for widget creation", filterId);

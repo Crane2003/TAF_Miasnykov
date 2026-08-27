@@ -14,8 +14,7 @@ public class DashboardApiTests : BaseTest
     [SetUp]
     public void InitApiService()
     {
-        _dashboardApiService = new DashboardApiService(ApiConfiguration.BaseUrl, Configuration.ProjectName);
-        _dashboardApiService.SetAuthToken(ApiConfiguration.AuthToken);
+        _dashboardApiService = new DashboardApiService(Configuration.ProjectName);
         _createdDashboardId = null;
     }
 

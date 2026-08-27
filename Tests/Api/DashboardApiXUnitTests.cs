@@ -21,8 +21,7 @@ public class DashboardApiXUnitTests : XUnitBaseTest, IAsyncLifetime, IClassFixtu
 
     public DashboardApiXUnitTests(XUnitTestFixture fixture) : base(fixture)
     {
-        _dashboardApiService = new DashboardApiService(ApiConfiguration.BaseUrl, Configuration.ProjectName);
-        _dashboardApiService.SetAuthToken(ApiConfiguration.AuthToken);
+        _dashboardApiService = new DashboardApiService(Configuration.ProjectName);
     }
 
     public override ValueTask InitializeAsync()
