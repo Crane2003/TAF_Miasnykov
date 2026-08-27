@@ -1,5 +1,6 @@
 using Business.Models;
 using Business.Services;
+using Core.Utilities;
 using Tests.Base;
 using Tests.Helpers;
 
@@ -50,7 +51,7 @@ public class DashboardApiTests : BaseTest
         var createResult = await _dashboardApiService.CreateDashboardAsync(request);
         _createdDashboardId = createResult!.Id;
 
-        var updatedName = $"Updated Dashboard Name {Guid.NewGuid()}";
+        var updatedName = $"Updated Dashboard Name".Unique();
         var updateRequest = new DashboardUpdateRequest
         {
             Name = updatedName,
@@ -74,7 +75,7 @@ public class DashboardApiTests : BaseTest
         var createResult = await _dashboardApiService.CreateDashboardAsync(request);
         _createdDashboardId = createResult!.Id;
 
-        var widget = Widget.CreateChartWidget($"Test Chart Widget {Guid.NewGuid()}", 0, 0);
+        var widget = Widget.CreateChartWidget($"Test Chart Widget".Unique(), 0, 0);
         var addWidgetResult = await _dashboardApiService.AddWidgetToDashboardAsync(createResult.Id, widget);
 
         Assert.That(addWidgetResult, Is.Not.Null);
@@ -89,8 +90,8 @@ public class DashboardApiTests : BaseTest
         var createResult = await _dashboardApiService.CreateDashboardAsync(request);
         _createdDashboardId = createResult!.Id;
 
-        var widget1 = Widget.CreateChartWidget($"Widget 1 {Guid.NewGuid()}", 0, 0);
-        var widget2 = Widget.CreateChartWidget($"Widget 2 {Guid.NewGuid()}", 1, 0);
+        var widget1 = Widget.CreateChartWidget($"Widget 1".Unique(), 0, 0);
+        var widget2 = Widget.CreateChartWidget($"Widget 2".Unique(), 1, 0);
         await _dashboardApiService.AddWidgetToDashboardAsync(createResult.Id, widget1);
         var addResult = await _dashboardApiService.AddWidgetToDashboardAsync(createResult.Id, widget2);
 

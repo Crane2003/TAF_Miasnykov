@@ -25,7 +25,7 @@ public class ApiEndpoints
     // GET /dashboard/{id}/config
     public string DashboardConfig(int dashboardId) => $"{Base}/{dashboardId}/config";
 
-    // POST /widget - creates a project widget with a caller-supplied name
+    // POST /widget - creates a project widget
     public string Widgets => $"/{_projectName}/widget";
 
     // GET /filter - user filters a widget can be bound to

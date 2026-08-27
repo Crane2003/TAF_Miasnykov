@@ -85,7 +85,7 @@ public class DashboardApiXUnitTests : XUnitBaseTest, IAsyncLifetime, IClassFixtu
 
     #region Journey: Get a created dashboard (GET)
 
-    // POSITIVE: a created dashboard is readable and round-trips its stored values.
+    // POSITIVE: a created dashboard is readable.
     [Fact]
     public async Task GetDashboard_ViaGetRequest_ShouldReturnCreatedDashboard()
     {
@@ -102,7 +102,7 @@ public class DashboardApiXUnitTests : XUnitBaseTest, IAsyncLifetime, IClassFixtu
         Assert.Equal(request.Description, result.Description);
     }
 
-    // NEGATIVE: an id that cannot exist is reported as missing instead of returning data.
+    // NEGATIVE: request with an id that cannot exist returns null.
     [Fact]
     public async Task GetNonExistentDashboard_ShouldReturnError()
     {
@@ -125,7 +125,7 @@ public class DashboardApiXUnitTests : XUnitBaseTest, IAsyncLifetime, IClassFixtu
 
         var updateRequest = new DashboardUpdateRequest
         {
-            Name = $"Updated Dashboard Name {Guid.NewGuid()}",
+            Name = $"Updated Dashboard Name".Unique(),
             Description = "Updated description"
         };
 
@@ -133,7 +133,7 @@ public class DashboardApiXUnitTests : XUnitBaseTest, IAsyncLifetime, IClassFixtu
 
         Assert.NotNull(updateResult);
         Assert.Equal(updateRequest.Name, updateResult.Name);
-        Assert.Equal("Updated description", updateResult.Description);
+        Assert.Equal(updateRequest.Description, updateResult.Description);
     }
 
     // NEGATIVE: the API returns HTTP 404 when the dashboard does not exist on the project.
@@ -151,7 +151,7 @@ public class DashboardApiXUnitTests : XUnitBaseTest, IAsyncLifetime, IClassFixtu
         Assert.Null(result);
     }
 
-    // NEGATIVE: the same name validation as create applies on update, so a blank name is rejected.
+    // NEGATIVE: blank name is rejected.
     [Fact]
     public async Task UpdateDashboard_WithEmptyName_ShouldFail()
     {
@@ -170,7 +170,7 @@ public class DashboardApiXUnitTests : XUnitBaseTest, IAsyncLifetime, IClassFixtu
 
     #region Journey: Lock a dashboard (PATCH)
 
-    // POSITIVE: patching the lock flag is persisted and visible on a subsequent read.
+    // POSITIVE: patching the lock flag is visible on a subsequent read.
     [Fact]
     public async Task LockDashboard_ViaPatchRequest_ShouldMarkDashboardLocked()
     {
@@ -218,7 +218,7 @@ public class DashboardApiXUnitTests : XUnitBaseTest, IAsyncLifetime, IClassFixtu
         var createResult = await _dashboardApiService.CreateDashboardAsync(request);
         _createdDashboardId = createResult!.Id;
 
-        var widget = Widget.CreateChartWidget($"Test Chart Widget {Guid.NewGuid()}", 0, 0);
+        var widget = Widget.CreateChartWidget($"Test Chart Widget".Unique(), 0, 0);
         var addWidgetResult = await _dashboardApiService.AddWidgetToDashboardAsync(createResult.Id, widget);
 
         Assert.NotNull(addWidgetResult);
@@ -238,8 +238,8 @@ public class DashboardApiXUnitTests : XUnitBaseTest, IAsyncLifetime, IClassFixtu
         var createResult = await _dashboardApiService.CreateDashboardAsync(request);
         _createdDashboardId = createResult!.Id;
 
-        var widget1 = Widget.CreateChartWidget("Widget 1", 0, 0);
-        var widget2 = Widget.CreateChartWidget("Widget 2", 1, 0);
+        var widget1 = Widget.CreateChartWidget($"Widget 1".Unique(), 0, 0);
+        var widget2 = Widget.CreateChartWidget($"Widget 2".Unique(), 1, 0);
         await _dashboardApiService.AddWidgetToDashboardAsync(createResult.Id, widget1);
         var addResult = await _dashboardApiService.AddWidgetToDashboardAsync(createResult.Id, widget2);
 
@@ -270,7 +270,7 @@ public class DashboardApiXUnitTests : XUnitBaseTest, IAsyncLifetime, IClassFixtu
 
     #region Journey: Remove a dashboard (DELETE)
 
-    // POSITIVE: the dashboard is deleted and no longer resolvable afterwards.
+    // POSITIVE: the dashboard is deleted.
     [Fact]
     public async Task DeleteDashboard_ViaDeleteRequest_ShouldRemoveDashboard()
     {
@@ -285,7 +285,7 @@ public class DashboardApiXUnitTests : XUnitBaseTest, IAsyncLifetime, IClassFixtu
         Assert.False(exists);
     }
 
-    // NEGATIVE: deleting an id that was never allocated is reported as missing.
+    // NEGATIVE: deleting a non-existent id.
     [Fact]
     public async Task DeleteDashboard_WithNonExistentId_ShouldFail()
     {

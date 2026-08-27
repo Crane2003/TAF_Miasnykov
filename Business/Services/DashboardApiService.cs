@@ -18,11 +18,9 @@ public class DashboardApiService
         PropertyNameCaseInsensitive = true
     };
 
-    private const int MaxAddWidgetAttempts = 5;
-    private const int MaxWriteAttempts = 4;
-    private const int BaseBackoffMs = 200;
-    private const int MaxBackoffShift = 4;
-    private const int MaxJitterMs = 150;
+    // Parallel fixtures can hit a transient backend locking error; the same payload succeeds on retry.
+    private const int MaxWriteAttempts = 2;
+    private const int ConcurrencyRetryDelayMs = 250;
 
     public DashboardApiService(string projectName)
     {
@@ -38,7 +36,7 @@ public class DashboardApiService
         {
             _logger.Information("Creating dashboard: {DashboardName}", request.Name);
 
-            for (var attempt = 0; attempt < MaxWriteAttempts; attempt++)
+            for (var attempt = 1; ; attempt++)
             {
                 var response = await _apiClient.ExecutePostAsync(_endpoints.Dashboards, request);
 
@@ -50,10 +48,10 @@ public class DashboardApiService
                     if (created?.Id > 0) return await GetDashboardAsync(created.Id);
                 }
 
-                if (IsTransientConcurrencyFailure(response) && attempt < MaxWriteAttempts - 1)
+                if (IsTransientConcurrencyFailure(response) && attempt < MaxWriteAttempts)
                 {
-                    _logger.Warning("Dashboard creation hit a transient backend locking error, retrying. Attempt {Attempt}", attempt + 1);
-                    await BackoffDelayAsync(attempt);
+                    _logger.Warning("Dashboard creation hit a transient backend locking error on attempt {Attempt}; retrying.", attempt);
+                    await Task.Delay(ConcurrencyRetryDelayMs);
 
                     continue;
                 }
@@ -61,8 +59,6 @@ public class DashboardApiService
                 _logger.Warning("Failed to create dashboard. Status: {StatusCode}. Body: {Body}", (int)response.StatusCode, response.Content);
                 return null;
             }
-
-            return null;
         }
         catch (Exception ex)
         {
@@ -164,26 +160,24 @@ public class DashboardApiService
                 }
             };
 
-            // The link step is retried because the backend intermittently rejects it under parallel load
-            for (var attempt = 0; attempt < MaxAddWidgetAttempts; attempt++)
+            for (var attempt = 1; ; attempt++)
             {
                 var response = await _apiClient.ExecutePutAsync(_endpoints.AddWidget(dashboardId), request);
 
                 if (response.IsSuccessful)
                     return await GetDashboardAsync(dashboardId);
 
-                if (attempt < MaxAddWidgetAttempts - 1)
+                if (IsTransientConcurrencyFailure(response) && attempt < MaxWriteAttempts)
                 {
-                    _logger.Warning("Add widget to dashboard {DashboardId} failed (attempt {Attempt}). Retrying.", dashboardId, attempt + 1);
-                    await BackoffDelayAsync(attempt);
-                }
-                else
-                {
-                    _logger.Warning("Failed to add widget to dashboard {DashboardId}. Status: {StatusCode}", dashboardId, (int)response.StatusCode);
-                }
-            }
+                    _logger.Warning("Add widget to dashboard {DashboardId} hit a transient backend locking error on attempt {Attempt}; retrying.", dashboardId, attempt);
+                    await Task.Delay(ConcurrencyRetryDelayMs);
 
-            return null;
+                    continue;
+                }
+
+                _logger.Warning("Failed to add widget to dashboard {DashboardId}. Status: {StatusCode}. Body: {Body}", dashboardId, (int)response.StatusCode, response.Content);
+                return null;
+            }
         }
         catch (Exception ex)
         {
@@ -309,15 +303,9 @@ public class DashboardApiService
     }
 
     /// <summary>
-    /// Detects the backend's HTTP 500 locking clash, which succeeds when the same payload is retried.
+    /// Detects the backend's HTTP 500 optimistic-locking clash, which succeeds when the same payload is retried.
     /// </summary>
     private static bool IsTransientConcurrencyFailure(RestResponse response)
         => response.StatusCode == HttpStatusCode.InternalServerError
            && response.Content?.Contains("updated or deleted by another transaction", StringComparison.OrdinalIgnoreCase) is true;
-
-    /// <summary>
-    /// Exponential backoff with jitter to reduce contention under parallel load.
-    /// </summary>
-    private static Task BackoffDelayAsync(int attempt)
-        => Task.Delay(BaseBackoffMs * (1 << Math.Min(attempt, MaxBackoffShift)) + Random.Shared.Next(0, MaxJitterMs));
 }
