@@ -305,7 +305,7 @@ public class DashboardApiService
     /// <summary>
     /// Detects the backend's HTTP 500 optimistic-locking clash, which succeeds when the same payload is retried.
     /// </summary>
-    private static bool IsTransientConcurrencyFailure(RestResponse response)
+    private static bool IsTransientConcurrencyFailure(ApiResponse response)
         => response.StatusCode == HttpStatusCode.InternalServerError
            && response.Content?.Contains("updated or deleted by another transaction", StringComparison.OrdinalIgnoreCase) is true;
 }
