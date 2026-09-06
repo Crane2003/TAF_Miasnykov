@@ -64,8 +64,7 @@ public sealed class DashboardHooks
         var testConfig = configLoader.GetTestConfiguration();
         var apiConfig = configLoader.GetApiConfiguration();
 
-        _dashboardContext.ApiService = new DashboardApiService(apiConfig.BaseUrl, testConfig.ProjectName);
-        _dashboardContext.ApiService.SetAuthToken(apiConfig.AuthToken);
+        _dashboardContext.ApiService = new DashboardApiService(testConfig.ProjectName);
     }
 
     [AfterScenario("api")]

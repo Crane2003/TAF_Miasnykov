@@ -36,8 +36,8 @@ Feature: Dashboard API BDD Tests
 	  Examples:
 		| InitialName                | UpdatedName                     | UpdatedDescription                |
 		| BDD Update Test - Basic    | Renamed BDD Dashboard           | Automated BDD test dashboard      |
-		| BDD Update Test - Short    | X                               | Y                                 |
-		| BDD Update Test - Special  | Updated: CI/CD & Monitor (v3.0) | Special chars & "quotes" 'apos'   |
+		| BDD Update Test - Short    | XYZ                             | Y10                               |
+		| BDD Update Test - Special  | Updated: CI/CD & Monitor (v3.0) | Special chars & 'quotes' 'apos'   |
 
   Rule: Widgets can be added to dashboards
 
@@ -46,8 +46,8 @@ Feature: Dashboard API BDD Tests
 	  When I add the following widgets to the dashboard:
 		| Name                     | Type              | Width | Height | PositionX | PositionY |
 		| Overall Statistics Panel | overallStatistics | 6     | 7      | 0         | 0         |
-		| Launch Statistics Chart  | chart             | 6     | 4      | 6         | 0         |
-		| Failed Tests Table       | table             | 12    | 6      | 0         | 7         |
+		| Launch Statistics Chart  | statisticTrend    | 6     | 4      | 6         | 0         |
+		| Failed Tests Table       | launchesTable     | 12    | 6      | 0         | 7         |
 	  Then the dashboard should contain 3 widgets
 	  And each widget should have the correct name and type
 

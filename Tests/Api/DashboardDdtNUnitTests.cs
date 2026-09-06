@@ -1,5 +1,6 @@
 using Business.Models;
 using Business.Services;
+using Core.Utilities;
 using Tests.Base;
 using Tests.TestData;
 
@@ -17,8 +18,7 @@ public class DashboardDdtNUnitTests : BaseTest
     [SetUp]
     public void InitApiService()
     {
-        _dashboardApiService = new DashboardApiService(ApiConfiguration.BaseUrl, Configuration.ProjectName);
-        _dashboardApiService.SetAuthToken(ApiConfiguration.AuthToken);
+        _dashboardApiService = new DashboardApiService(Configuration.ProjectName);
         _createdDashboardId = null;
     }
 
@@ -65,6 +65,16 @@ public class DashboardDdtNUnitTests : BaseTest
     [TestCaseSource(typeof(NUnitTestDataAdapter), nameof(NUnitTestDataAdapter.WidgetCases))]
     public async Task AddWidget_WithVariousConfigurations_ShouldBeStoredCorrectly(Widget widget)
     {
+        // Widget names are unique per project, and the case data is shared between
+        // fixtures, so work against a uniquely named copy.
+        widget = new Widget
+        {
+            Name = widget.Name.Unique(),
+            Type = widget.Type,
+            Size = widget.Size,
+            Position = widget.Position
+        };
+
         var createRequest = DashboardCreateRequest.CreateDefault();
         var dashboard = await _dashboardApiService.CreateDashboardAsync(createRequest);
         Assert.That(dashboard, Is.Not.Null);

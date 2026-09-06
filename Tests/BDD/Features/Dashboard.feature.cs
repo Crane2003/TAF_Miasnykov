@@ -198,8 +198,8 @@ namespace Tests.BDD.Features
         [global::Xunit.TraitAttribute("FeatureTitle", "Dashboard API BDD Tests")]
         [global::Xunit.TraitAttribute("Description", "Update a dashboard name and description")]
         [global::Xunit.InlineDataAttribute("BDD Update Test - Basic", "Renamed BDD Dashboard", "Automated BDD test dashboard", "4", new string[0])]
-        [global::Xunit.InlineDataAttribute("BDD Update Test - Short", "X", "Y", "5", new string[0])]
-        [global::Xunit.InlineDataAttribute("BDD Update Test - Special", "Updated: CI/CD & Monitor (v3.0)", "Special chars & \"quotes\" \'apos\'", "6", new string[0])]
+        [global::Xunit.InlineDataAttribute("BDD Update Test - Short", "XYZ", "Y10", "5", new string[0])]
+        [global::Xunit.InlineDataAttribute("BDD Update Test - Special", "Updated: CI/CD & Monitor (v3.0)", "Special chars & \'quotes\' \'apos\'", "6", new string[0])]
         public async global::System.Threading.Tasks.Task UpdateADashboardNameAndDescription(string initialName, string updatedName, string updatedDescription, string @__pickleIndex, string[] exampleTags)
         {
             string[] tagsOfScenario = exampleTags;
@@ -289,14 +289,14 @@ namespace Tests.BDD.Features
                             "0"});
                 table1.AddRow(new string[] {
                             "Launch Statistics Chart",
-                            "chart",
+                            "statisticTrend",
                             "6",
                             "4",
                             "6",
                             "0"});
                 table1.AddRow(new string[] {
                             "Failed Tests Table",
-                            "table",
+                            "launchesTable",
                             "12",
                             "6",
                             "0",

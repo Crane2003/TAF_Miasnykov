@@ -1,4 +1,5 @@
 using System.Text.Json.Serialization;
+using Core.Utilities;
 
 namespace Business.Models;
 
@@ -12,7 +13,7 @@ public class DashboardCreateRequest
 
     public static DashboardCreateRequest CreateDefault() => new()
     {
-        Name = $"Test Dashboard {DateTime.Now:yyyyMMddHHmmss}",
+        Name = "Test Dashboard".Unique(),
         Description = "Automated test dashboard"
     };
 

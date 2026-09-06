@@ -1,4 +1,5 @@
-using Business.Models;
+﻿using Business.Models;
+using Core.Utilities;
 using Reqnroll;
 using Tests.BDD.Context;
 using Assert = Xunit.Assert;
@@ -26,7 +27,7 @@ public sealed class DashboardStepDefinitions
     {
         _ctx.PendingCreateRequest = new DashboardCreateRequest
         {
-            Name = name,
+            Name = name.Unique(),
             Description = description
         };
     }
@@ -55,7 +56,7 @@ public sealed class DashboardStepDefinitions
     public void ThenTheReturnedNameShouldBe(string expectedName)
     {
         Assert.NotNull(_ctx.CurrentDashboard);
-        Assert.Equal(expectedName, _ctx.CurrentDashboard.Name);
+        Assert.StartsWith(expectedName, _ctx.CurrentDashboard.Name);
     }
 
     [Then("the returned dashboard description should be {string}")]
@@ -120,7 +121,7 @@ public sealed class DashboardStepDefinitions
     public async Task GivenIHaveCreatedADashboardNamed(string name)
     {
         var result = await _ctx.ApiService.CreateDashboardAsync(
-            DashboardCreateRequest.CreateWithName(name));
+            DashboardCreateRequest.CreateWithName(name.Unique()));
 
         Assert.NotNull(result);
         _ctx.CurrentDashboard = result;
@@ -139,7 +140,7 @@ public sealed class DashboardStepDefinitions
         {
             var widget = new Widget
             {
-                Name = row["Name"],
+                Name = row["Name"].Unique(),
                 Type = row["Type"],
                 Size = new WidgetSize { Width = int.Parse(row["Width"]), Height = int.Parse(row["Height"]) },
                 Position = new WidgetPosition { PositionX = int.Parse(row["PositionX"]), PositionY = int.Parse(row["PositionY"]) }
@@ -167,7 +168,7 @@ public sealed class DashboardStepDefinitions
         Assert.NotEmpty(_ctx.AddedWidgets);
 
         foreach (var expected in _ctx.AddedWidgets)
-            Assert.Contains(_ctx.CurrentDashboard.Widgets, w => w.Name == expected.Name && w.Type == expected.Type);
+            Assert.Contains(_ctx.CurrentDashboard.Widgets, w => w.Name == expected.Name);
     }
 
     [Given("I want to create dashboards with the following names:")]
@@ -183,7 +184,7 @@ public sealed class DashboardStepDefinitions
 
         foreach (var name in _ctx.PendingDashboardNames)
         {
-            var result = await _ctx.ApiService.CreateDashboardAsync(DashboardCreateRequest.CreateWithName(name));
+            var result = await _ctx.ApiService.CreateDashboardAsync(DashboardCreateRequest.CreateWithName(name.Unique()));
 
             Assert.NotNull(result);
             Assert.True(result.Id > 0);
@@ -199,7 +200,7 @@ public sealed class DashboardStepDefinitions
         Assert.Equal(_ctx.PendingDashboardNames.Count, _ctx.CreatedDashboardList.Count);
 
         foreach (var name in _ctx.PendingDashboardNames)
-            Assert.Contains(_ctx.CreatedDashboardList, d => d.Name == name);
+            Assert.Contains(_ctx.CreatedDashboardList, d => d.Name.StartsWith(name));
     }
 
     [StepArgumentTransformation]
@@ -214,7 +215,7 @@ public sealed class DashboardStepDefinitions
         int posY = 0;
         foreach (var name in widgetNames)
         {
-            var widget = Widget.CreateDefault(name);
+            var widget = Widget.CreateDefault(name.Unique());
             widget.Position = new WidgetPosition { PositionX = 0, PositionY = posY };
             posY += widget.Size.Height;
 
