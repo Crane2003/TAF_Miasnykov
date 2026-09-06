@@ -4,8 +4,10 @@ namespace Core.Driver;
 
 public class DriverManager
 {
-    private static readonly ThreadLocal<IWebDriver?> _driver = new();
+    private static readonly AsyncLocal<IWebDriver?> _driver = new();
     private static readonly ILogger _logger = Log.ForContext<DriverManager>();
+
+    public static IWebDriver? CurrentDriver => _driver.Value;
 
     public static IWebDriver Driver
     {

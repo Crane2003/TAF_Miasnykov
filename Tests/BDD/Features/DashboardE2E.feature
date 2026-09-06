@@ -7,23 +7,40 @@ Feature: Dashboard E2E Tests
   Background:
 	Given the user is authenticated and logged in to the application
 
-  Rule: Dashboard page displays required UI elements
+  Rule: Dashboard lifecycle via UI
 
-	Scenario: Dashboard page loads successfully
-	  When the user navigates to the dashboards page
-	  Then the dashboard page should be loaded successfully
+	Scenario: User can create a dashboard via UI
+	  Given a unique dashboard name is prepared with base "E2E Dashboard"
+	  When the user creates the dashboard via UI with description "Created via UI E2E test"
+	  Then the prepared dashboard should be visible
 
-	Scenario: Add New Dashboard button is displayed on the page
-	  When the user navigates to the dashboards page
-	  Then the Add New Dashboard button should be visible
+	Scenario: User can remove a dashboard via UI
+	  Given a dashboard is created via API with base name "E2E Dashboard"
+	  When the user removes the prepared dashboard via UI
+	  Then the prepared dashboard should not be visible on home page
 
-	Scenario: Add New Widget button is displayed on the page
-	  When the user navigates to the dashboards page
-	  Then the Add New Widget button should be visible
+	Scenario: User can edit a dashboard via UI
+	  Given a dashboard is created via API with base name "E2E Dashboard"
+	  And an updated dashboard name is prepared from the current dashboard name
+	  When the user edits the prepared dashboard via UI with description "Updated via UI E2E test"
+	  Then the updated dashboard should be visible on details page
 
-  Rule: Dashboards created via API are reflected in the UI
+  Rule: Widget lifecycle via UI
 
-	Scenario: A dashboard created via API appears in the dashboard list
-	  Given a new dashboard is created via the API with name "E2E BDD Dashboard"
-	  When the user navigates to the dashboards page
-	  Then the dashboard named "E2E BDD Dashboard" should be visible in the list
+	Scenario: User can add a widget to a dashboard
+	  Given a default dashboard is created via API
+	  And a unique widget name is prepared with base "E2E Widget"
+	  When the user adds widget type "overallStatistics" with the prepared widget name and description "Widget added via UI E2E test"
+	  Then the prepared widget should be visible
+
+	Scenario: User can change widget order on a dashboard
+	  Given a default dashboard is created via API
+	  And two widgets are created via API for reorder with bases "E2E Widget A" and "E2E Widget B"
+	  When the user reorders the second prepared widget before the first prepared widget
+	  Then the second prepared widget should appear before the first prepared widget
+
+	Scenario: User can remove a widget from a dashboard
+	  Given a default dashboard is created via API
+	  And a default widget is created via API with base name "E2E Widget"
+	  When the user removes the prepared widget via UI
+	  Then the prepared widget should not be visible
