@@ -3,6 +3,7 @@ using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Core.Configuration;
+using RestSharp.Authenticators;
 
 namespace Core.Api;
 
