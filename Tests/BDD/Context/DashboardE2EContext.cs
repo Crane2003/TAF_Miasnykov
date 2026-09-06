@@ -13,4 +13,10 @@ public sealed class DashboardE2EContext
     public void TrackDashboard(int id) => CreatedDashboardIds.Add(id);
 
     public string? LastCreatedDashboardName { get; set; }
+    public int? LastCreatedDashboardId { get; set; }
+    public string? UpdatedDashboardName { get; set; }
+
+    public string? LastCreatedWidgetName { get; set; }
+    public string? FirstWidgetName { get; set; }
+    public string? SecondWidgetName { get; set; }
 }

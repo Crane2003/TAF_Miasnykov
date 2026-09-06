@@ -117,7 +117,7 @@ namespace Tests.BDD.Features
         
         private static global::Reqnroll.Formatters.RuntimeSupport.FeatureLevelCucumberMessages InitializeCucumberMessages()
         {
-            return new global::Reqnroll.Formatters.RuntimeSupport.FeatureLevelCucumberMessages("BDD/Features/DashboardE2E.feature.ndjson", 6);
+            return new global::Reqnroll.Formatters.RuntimeSupport.FeatureLevelCucumberMessages("BDD/Features/DashboardE2E.feature.ndjson", 8);
         }
         
         async System.Threading.Tasks.ValueTask Xunit.IAsyncLifetime.InitializeAsync()
@@ -145,17 +145,17 @@ namespace Tests.BDD.Features
             await this.TestTearDownAsync();
         }
         
-        [global::Xunit.FactAttribute(DisplayName="Dashboard page loads successfully")]
+        [global::Xunit.FactAttribute(DisplayName="User can create a dashboard via UI")]
         [global::Xunit.TraitAttribute("FeatureTitle", "Dashboard E2E Tests")]
-        [global::Xunit.TraitAttribute("Description", "Dashboard page loads successfully")]
-        public async global::System.Threading.Tasks.Task DashboardPageLoadsSuccessfully()
+        [global::Xunit.TraitAttribute("Description", "User can create a dashboard via UI")]
+        public async global::System.Threading.Tasks.Task UserCanCreateADashboardViaUI()
         {
             string[] tagsOfScenario = ((string[])(null));
             global::System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new global::System.Collections.Specialized.OrderedDictionary();
             string pickleIndex = "0";
-            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Dashboard page loads successfully", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
+            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("User can create a dashboard via UI", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
             string[] tagsOfRule = ((string[])(null));
-            global::Reqnroll.RuleInfo ruleInfo = new global::Reqnroll.RuleInfo("Dashboard page displays required UI elements", null, tagsOfRule);
+            global::Reqnroll.RuleInfo ruleInfo = new global::Reqnroll.RuleInfo("Dashboard lifecycle via UI", null, tagsOfRule);
 #line 12
  this.ScenarioInitialize(scenarioInfo, ruleInfo);
 #line hidden
@@ -170,27 +170,30 @@ namespace Tests.BDD.Features
   await this.FeatureBackgroundAsync();
 #line hidden
 #line 13
-   await testRunner.WhenAsync("the user navigates to the dashboards page", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
+   await testRunner.GivenAsync("a unique dashboard name is prepared with base \"E2E Dashboard\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
 #line hidden
 #line 14
-   await testRunner.ThenAsync("the dashboard page should be loaded successfully", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
+   await testRunner.WhenAsync("the user creates the dashboard via UI with description \"Created via UI E2E test\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
+#line hidden
+#line 15
+   await testRunner.ThenAsync("the prepared dashboard should be visible", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
 #line hidden
             }
             await this.ScenarioCleanupAsync();
         }
         
-        [global::Xunit.FactAttribute(DisplayName="Add New Dashboard button is displayed on the page")]
+        [global::Xunit.FactAttribute(DisplayName="User can remove a dashboard via UI")]
         [global::Xunit.TraitAttribute("FeatureTitle", "Dashboard E2E Tests")]
-        [global::Xunit.TraitAttribute("Description", "Add New Dashboard button is displayed on the page")]
-        public async global::System.Threading.Tasks.Task AddNewDashboardButtonIsDisplayedOnThePage()
+        [global::Xunit.TraitAttribute("Description", "User can remove a dashboard via UI")]
+        public async global::System.Threading.Tasks.Task UserCanRemoveADashboardViaUI()
         {
             string[] tagsOfScenario = ((string[])(null));
             global::System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new global::System.Collections.Specialized.OrderedDictionary();
             string pickleIndex = "1";
-            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Add New Dashboard button is displayed on the page", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
+            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("User can remove a dashboard via UI", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
             string[] tagsOfRule = ((string[])(null));
-            global::Reqnroll.RuleInfo ruleInfo = new global::Reqnroll.RuleInfo("Dashboard page displays required UI elements", null, tagsOfRule);
-#line 16
+            global::Reqnroll.RuleInfo ruleInfo = new global::Reqnroll.RuleInfo("Dashboard lifecycle via UI", null, tagsOfRule);
+#line 17
  this.ScenarioInitialize(scenarioInfo, ruleInfo);
 #line hidden
             if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
@@ -203,28 +206,31 @@ namespace Tests.BDD.Features
 #line 7
   await this.FeatureBackgroundAsync();
 #line hidden
-#line 17
-   await testRunner.WhenAsync("the user navigates to the dashboards page", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
-#line hidden
 #line 18
-   await testRunner.ThenAsync("the Add New Dashboard button should be visible", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
+   await testRunner.GivenAsync("a dashboard is created via API with base name \"E2E Dashboard\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
+#line hidden
+#line 19
+   await testRunner.WhenAsync("the user removes the prepared dashboard via UI", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
+#line hidden
+#line 20
+   await testRunner.ThenAsync("the prepared dashboard should not be visible on home page", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
 #line hidden
             }
             await this.ScenarioCleanupAsync();
         }
         
-        [global::Xunit.FactAttribute(DisplayName="Add New Widget button is displayed on the page")]
+        [global::Xunit.FactAttribute(DisplayName="User can edit a dashboard via UI")]
         [global::Xunit.TraitAttribute("FeatureTitle", "Dashboard E2E Tests")]
-        [global::Xunit.TraitAttribute("Description", "Add New Widget button is displayed on the page")]
-        public async global::System.Threading.Tasks.Task AddNewWidgetButtonIsDisplayedOnThePage()
+        [global::Xunit.TraitAttribute("Description", "User can edit a dashboard via UI")]
+        public async global::System.Threading.Tasks.Task UserCanEditADashboardViaUI()
         {
             string[] tagsOfScenario = ((string[])(null));
             global::System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new global::System.Collections.Specialized.OrderedDictionary();
             string pickleIndex = "2";
-            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Add New Widget button is displayed on the page", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
+            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("User can edit a dashboard via UI", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
             string[] tagsOfRule = ((string[])(null));
-            global::Reqnroll.RuleInfo ruleInfo = new global::Reqnroll.RuleInfo("Dashboard page displays required UI elements", null, tagsOfRule);
-#line 20
+            global::Reqnroll.RuleInfo ruleInfo = new global::Reqnroll.RuleInfo("Dashboard lifecycle via UI", null, tagsOfRule);
+#line 22
  this.ScenarioInitialize(scenarioInfo, ruleInfo);
 #line hidden
             if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
@@ -237,28 +243,35 @@ namespace Tests.BDD.Features
 #line 7
   await this.FeatureBackgroundAsync();
 #line hidden
-#line 21
-   await testRunner.WhenAsync("the user navigates to the dashboards page", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
+#line 23
+   await testRunner.GivenAsync("a dashboard is created via API with base name \"E2E Dashboard\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
 #line hidden
-#line 22
-   await testRunner.ThenAsync("the Add New Widget button should be visible", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
+#line 24
+   await testRunner.AndAsync("an updated dashboard name is prepared from the current dashboard name", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+#line 25
+   await testRunner.WhenAsync("the user edits the prepared dashboard via UI with description \"Updated via UI E2E" +
+                        " test\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
+#line hidden
+#line 26
+   await testRunner.ThenAsync("the updated dashboard should be visible on details page", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
 #line hidden
             }
             await this.ScenarioCleanupAsync();
         }
         
-        [global::Xunit.FactAttribute(DisplayName="A dashboard created via API appears in the dashboard list")]
+        [global::Xunit.FactAttribute(DisplayName="User can add a widget to a dashboard")]
         [global::Xunit.TraitAttribute("FeatureTitle", "Dashboard E2E Tests")]
-        [global::Xunit.TraitAttribute("Description", "A dashboard created via API appears in the dashboard list")]
-        public async global::System.Threading.Tasks.Task ADashboardCreatedViaAPIAppearsInTheDashboardList()
+        [global::Xunit.TraitAttribute("Description", "User can add a widget to a dashboard")]
+        public async global::System.Threading.Tasks.Task UserCanAddAWidgetToADashboard()
         {
             string[] tagsOfScenario = ((string[])(null));
             global::System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new global::System.Collections.Specialized.OrderedDictionary();
             string pickleIndex = "3";
-            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("A dashboard created via API appears in the dashboard list", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
+            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("User can add a widget to a dashboard", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
             string[] tagsOfRule = ((string[])(null));
-            global::Reqnroll.RuleInfo ruleInfo = new global::Reqnroll.RuleInfo("Dashboards created via API are reflected in the UI", null, tagsOfRule);
-#line 26
+            global::Reqnroll.RuleInfo ruleInfo = new global::Reqnroll.RuleInfo("Widget lifecycle via UI", null, tagsOfRule);
+#line 30
  this.ScenarioInitialize(scenarioInfo, ruleInfo);
 #line hidden
             if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
@@ -271,14 +284,99 @@ namespace Tests.BDD.Features
 #line 7
   await this.FeatureBackgroundAsync();
 #line hidden
-#line 27
-   await testRunner.GivenAsync("a new dashboard is created via the API with name \"E2E BDD Dashboard\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
+#line 31
+   await testRunner.GivenAsync("a default dashboard is created via API", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
 #line hidden
-#line 28
-   await testRunner.WhenAsync("the user navigates to the dashboards page", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
+#line 32
+   await testRunner.AndAsync("a unique widget name is prepared with base \"E2E Widget\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
 #line hidden
-#line 29
-   await testRunner.ThenAsync("the dashboard named \"E2E BDD Dashboard\" should be visible in the list", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
+#line 33
+   await testRunner.WhenAsync("the user adds widget type \"overallStatistics\" with the prepared widget name and d" +
+                        "escription \"Widget added via UI E2E test\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
+#line hidden
+#line 34
+   await testRunner.ThenAsync("the prepared widget should be visible", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
+#line hidden
+            }
+            await this.ScenarioCleanupAsync();
+        }
+        
+        [global::Xunit.FactAttribute(DisplayName="User can change widget order on a dashboard")]
+        [global::Xunit.TraitAttribute("FeatureTitle", "Dashboard E2E Tests")]
+        [global::Xunit.TraitAttribute("Description", "User can change widget order on a dashboard")]
+        public async global::System.Threading.Tasks.Task UserCanChangeWidgetOrderOnADashboard()
+        {
+            string[] tagsOfScenario = ((string[])(null));
+            global::System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new global::System.Collections.Specialized.OrderedDictionary();
+            string pickleIndex = "4";
+            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("User can change widget order on a dashboard", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
+            string[] tagsOfRule = ((string[])(null));
+            global::Reqnroll.RuleInfo ruleInfo = new global::Reqnroll.RuleInfo("Widget lifecycle via UI", null, tagsOfRule);
+#line 36
+ this.ScenarioInitialize(scenarioInfo, ruleInfo);
+#line hidden
+            if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
+            {
+                await testRunner.SkipScenarioAsync();
+            }
+            else
+            {
+                await this.ScenarioStartAsync();
+#line 7
+  await this.FeatureBackgroundAsync();
+#line hidden
+#line 37
+   await testRunner.GivenAsync("a default dashboard is created via API", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
+#line hidden
+#line 38
+   await testRunner.AndAsync("two widgets are created via API for reorder with bases \"E2E Widget A\" and \"E2E Wi" +
+                        "dget B\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+#line 39
+   await testRunner.WhenAsync("the user reorders the second prepared widget before the first prepared widget", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
+#line hidden
+#line 40
+   await testRunner.ThenAsync("the second prepared widget should appear before the first prepared widget", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
+#line hidden
+            }
+            await this.ScenarioCleanupAsync();
+        }
+        
+        [global::Xunit.FactAttribute(DisplayName="User can remove a widget from a dashboard")]
+        [global::Xunit.TraitAttribute("FeatureTitle", "Dashboard E2E Tests")]
+        [global::Xunit.TraitAttribute("Description", "User can remove a widget from a dashboard")]
+        public async global::System.Threading.Tasks.Task UserCanRemoveAWidgetFromADashboard()
+        {
+            string[] tagsOfScenario = ((string[])(null));
+            global::System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new global::System.Collections.Specialized.OrderedDictionary();
+            string pickleIndex = "5";
+            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("User can remove a widget from a dashboard", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
+            string[] tagsOfRule = ((string[])(null));
+            global::Reqnroll.RuleInfo ruleInfo = new global::Reqnroll.RuleInfo("Widget lifecycle via UI", null, tagsOfRule);
+#line 42
+ this.ScenarioInitialize(scenarioInfo, ruleInfo);
+#line hidden
+            if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
+            {
+                await testRunner.SkipScenarioAsync();
+            }
+            else
+            {
+                await this.ScenarioStartAsync();
+#line 7
+  await this.FeatureBackgroundAsync();
+#line hidden
+#line 43
+   await testRunner.GivenAsync("a default dashboard is created via API", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
+#line hidden
+#line 44
+   await testRunner.AndAsync("a default widget is created via API with base name \"E2E Widget\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+#line 45
+   await testRunner.WhenAsync("the user removes the prepared widget via UI", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
+#line hidden
+#line 46
+   await testRunner.ThenAsync("the prepared widget should not be visible", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
 #line hidden
             }
             await this.ScenarioCleanupAsync();

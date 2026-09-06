@@ -17,7 +17,7 @@ public class UiBaseTest : BaseTest
         var testFailed = TestContext.CurrentContext.Result.Outcome.Status == NUnit.Framework.Interfaces.TestStatus.Failed;
 
         UiTestSupport.QuitWithScreenshot(
-            DriverManager.Driver,
+            DriverManager.CurrentDriver,
             testName,
             testFailed,
             Configuration.TakeScreenshotOnFailure,

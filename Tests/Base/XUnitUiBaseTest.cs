@@ -1,4 +1,5 @@
 using Core.Driver;
+using OpenQA.Selenium;
 using Xunit;
 
 namespace Tests.Base;
@@ -6,6 +7,7 @@ namespace Tests.Base;
 public abstract class XUnitUiBaseTest : XUnitBaseTest
 {
     private bool _setupFailed;
+    private IWebDriver? _driver;
     protected bool SetupFailed { get => _setupFailed; set => _setupFailed = value; }
 
     protected XUnitUiBaseTest(XUnitTestFixture fixture) : base(fixture)
@@ -16,7 +18,7 @@ public abstract class XUnitUiBaseTest : XUnitBaseTest
     {
         try
         {
-            UiTestSupport.InitDriver(Configuration);
+            _driver = UiTestSupport.InitDriver(Configuration);
         }
         catch
         {
@@ -32,7 +34,7 @@ public abstract class XUnitUiBaseTest : XUnitBaseTest
         var testFailed = _setupFailed || Xunit.TestContext.Current.TestState?.Result == TestResult.Failed;
 
         UiTestSupport.QuitWithScreenshot(
-            DriverManager.Driver,
+            _driver,
             testName,
             testFailed,
             Configuration.TakeScreenshotOnFailure,

@@ -57,8 +57,8 @@ public sealed class DashboardE2EHooks
 
         _e2eContext.AuthService.NavigateToLogin();
         _e2eContext.AuthService.Login(
-            credentials.DefaultUser.Username,
-            credentials.DefaultUser.Password);
+            credentials.AdminUser.Username,
+            credentials.AdminUser.Password);
 
         logger.Information("[E2E Scenario] Login completed");
     }
@@ -76,7 +76,7 @@ public sealed class DashboardE2EHooks
             or ScenarioExecutionStatus.BindingError;
 
         UiTestSupport.QuitWithScreenshot(
-            DriverManager.Driver,
+            DriverManager.CurrentDriver,
             _scenarioContext.ScenarioInfo.Title,
             testFailed: scenarioFailed,
             takeScreenshotOnFailure: testConfig.TakeScreenshotOnFailure,
