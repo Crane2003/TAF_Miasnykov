@@ -1,5 +1,4 @@
 using Core.Driver;
-using OpenQA.Selenium;
 using Xunit;
 
 namespace Tests.Base;
