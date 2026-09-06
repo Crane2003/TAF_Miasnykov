@@ -47,6 +47,7 @@ public sealed class DashboardE2EHooks
 
         var configLoader = ConfigurationLoader.Instance;
         var testConfig = configLoader.GetTestConfiguration();
+        var apiConfig = configLoader.GetApiConfiguration();
         var credentials = configLoader.GetCredentials();
 
         UiTestSupport.InitDriver(testConfig);

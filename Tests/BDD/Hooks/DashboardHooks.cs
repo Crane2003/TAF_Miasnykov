@@ -62,6 +62,7 @@ public sealed class DashboardHooks
 
         var configLoader = ConfigurationLoader.Instance;
         var testConfig = configLoader.GetTestConfiguration();
+        var apiConfig = configLoader.GetApiConfiguration();
 
         _dashboardContext.ApiService = new DashboardApiService(testConfig.ProjectName);
     }
