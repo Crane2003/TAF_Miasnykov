@@ -21,6 +21,13 @@ public static class DriverFactory
     private static ChromeDriver CreateChromeDriver(bool headless)
     {
         var options = new ChromeOptions();
+
+        // For CI/Linux environments, specify Chromium binary location
+        if (File.Exists("/usr/bin/chromium-browser"))
+        {
+            options.BinaryLocation = "/usr/bin/chromium-browser";
+        }
+
         options.AddArgument("--start-maximized");
         options.AddArgument("--ignore-certificate-errors");
         options.AddArgument("--no-sandbox");
