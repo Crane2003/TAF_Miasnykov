@@ -67,6 +67,14 @@ jobs:
           name: test-results
           path: TestResults/**/*.trx
 
+      - name: Upload screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-screenshots
+          path: Screenshots/**/*.png
+          if-no-files-found: ignore
+
       - name: Fail workflow if tests failed
         if: steps.test_step.outcome == 'failure'
         run: exit 1
