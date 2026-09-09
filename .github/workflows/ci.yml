@@ -39,7 +39,7 @@ jobs:
       - name: Install Chrome
         run: |
           sudo apt-get update
-          sudo apt-get install -y chromium-browser chromium-chromedriver
+          sudo apt-get install -y google-chrome-stable chromium-chromedriver
 
       - name: Restore
         run: dotnet restore TAF.slnx

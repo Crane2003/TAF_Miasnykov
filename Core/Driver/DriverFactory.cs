@@ -22,10 +22,21 @@ public static class DriverFactory
     {
         var options = new ChromeOptions();
 
-        // For CI/Linux environments, specify Chromium binary location
-        if (File.Exists("/usr/bin/chromium-browser"))
+        // For CI/Linux environments, specify Chrome binary location
+        var chromePaths = new[] 
+        { 
+            "/usr/bin/google-chrome",
+            "/usr/bin/chromium-browser",
+            "/snap/bin/chromium"
+        };
+
+        foreach (var path in chromePaths)
         {
-            options.BinaryLocation = "/usr/bin/chromium-browser";
+            if (File.Exists(path))
+            {
+                options.BinaryLocation = path;
+                break;
+            }
         }
 
         options.AddArgument("--start-maximized");
