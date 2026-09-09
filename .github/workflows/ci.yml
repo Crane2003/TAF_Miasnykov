@@ -19,6 +19,7 @@ jobs:
     env:
       TestConfiguration__BaseUrl: ${{ vars.TEST_BASE_URL }}
       TestConfiguration__ProjectName: ${{ vars.TEST_PROJECT_NAME }}
+      TestConfiguration__Headless: "true"
       Credentials__DefaultUser__Username: ${{ vars.DEFAULT_USER_USERNAME }}
       Credentials__DefaultUser__Password: ${{ secrets.DEFAULT_USER_PASSWORD }}
       Credentials__AdminUser__Username: ${{ vars.ADMIN_USER_USERNAME }}
