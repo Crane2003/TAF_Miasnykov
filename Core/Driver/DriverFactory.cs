@@ -23,6 +23,8 @@ public static class DriverFactory
         var options = new ChromeOptions();
         options.AddArgument("--start-maximized");
         options.AddArgument("--ignore-certificate-errors");
+        options.AddArgument("--no-sandbox");
+        options.AddArgument("--disable-gpu");
         options.AcceptInsecureCertificates = true;
         if (headless)
         {
