@@ -25,6 +25,7 @@ public static class DriverFactory
         options.AddArgument("--ignore-certificate-errors");
         options.AddArgument("--no-sandbox");
         options.AddArgument("--disable-gpu");
+        options.AddArgument("--disable-dev-shm-usage");
         options.AcceptInsecureCertificates = true;
         if (headless)
         {
