@@ -60,6 +60,7 @@ public class DashboardDdtNUnitTests : BaseTest
             Assert.That(updated.Name, Is.EqualTo(updateRequest.Name));
             Assert.That(updated.Description, Is.EqualTo(updateRequest.Description));
         }
+        Assert.Fail("Intentionally failing the test to verify screenshot capture and reporting");
     }
 
     [TestCaseSource(typeof(NUnitTestDataAdapter), nameof(NUnitTestDataAdapter.WidgetCases))]
