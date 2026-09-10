@@ -23,8 +23,10 @@ public static class DriverFactory
         var options = new ChromeOptions();
 
         // For CI/Linux environments, specify Chrome binary location
-        var chromePaths = new[] 
-        { 
+        var chromePathFromEnv = Environment.GetEnvironmentVariable("CHROME_PATH");
+        var chromePaths = new[]
+        {
+            chromePathFromEnv,
             "/usr/bin/google-chrome",
             "/usr/bin/chromium-browser",
             "/snap/bin/chromium"
@@ -32,7 +34,7 @@ public static class DriverFactory
 
         foreach (var path in chromePaths)
         {
-            if (File.Exists(path))
+            if (!string.IsNullOrEmpty(path) && File.Exists(path))
             {
                 options.BinaryLocation = path;
                 break;
