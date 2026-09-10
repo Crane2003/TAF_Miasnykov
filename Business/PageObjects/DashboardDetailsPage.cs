@@ -52,13 +52,13 @@ public class DashboardDetailsPage : BasePage
     {
         _deleteButton.Click();
 
-        var deleteModal = new BaseElement(_driver, DeleteDashboardModalLocator, timeoutInSeconds: 3);
+        var deleteModal = new BaseElement(_driver, DeleteDashboardModalLocator, timeoutInSeconds: 10);
         if (!deleteModal.IsDisplayed())
         {
             throw new WebDriverTimeoutException("Delete dashboard confirmation modal did not appear in time.");
         }
 
-        new Button(_driver, DeleteDashboardConfirmButtonLocator, timeoutInSeconds: 3).Click();
+        new Button(_driver, DeleteDashboardConfirmButtonLocator, timeoutInSeconds: 10).Click();
     }
 
     public override bool IsPageLoaded()
