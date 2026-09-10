@@ -52,8 +52,11 @@ public class DashboardDetailsPage : BasePage
     {
         _deleteButton.Click();
 
-        var deleteModal = new BaseElement(_driver, DeleteDashboardModalLocator, timeoutInSeconds: 10);
-        if (!deleteModal.IsDisplayed())
+        try
+        {
+            WaitHelper.WaitForElementVisible(_driver, DeleteDashboardModalLocator, timeoutInSeconds: 10);
+        }
+        catch (WebDriverTimeoutException)
         {
             throw new WebDriverTimeoutException("Delete dashboard confirmation modal did not appear in time.");
         }
