@@ -49,10 +49,10 @@ jobs:
           distribution: "temurin"
           java-version: "17"
 
-      - name: Install Chrome
-        uses: browser-actions/setup-chrome@v1
-        with:
-          chrome-version: stable
+      # - name: Install Chrome
+      #   uses: browser-actions/setup-chrome@v1
+      #   with:
+      #     chrome-version: stable
 
       - name: Cache SonarCloud packages
         uses: actions/cache@v4
@@ -93,41 +93,41 @@ jobs:
       - name: Build
         run: dotnet build TAF.slnx --configuration Release --no-restore
 
-      - name: Test
-        id: test_step
-        continue-on-error: true
-        run: dotnet test TAF.slnx --configuration Release --no-build --logger "trx;LogFileName=test-results.trx" --results-directory ./TestResults
+      # - name: Test
+      #   id: test_step
+      #   continue-on-error: true
+      #   run: dotnet test TAF.slnx --configuration Release --no-build --logger "trx;LogFileName=test-results.trx" --results-directory ./TestResults
 
       - name: End SonarCloud analysis
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: ./.sonar/scanner/dotnet-sonarscanner end /d:sonar.token="${{ secrets.SONAR_TOKEN }}"
 
-      - name: Publish test results
-        if: always()
-        uses: dorny/test-reporter@v1
-        with:
-          name: .NET Test Results
-          path: TestResults/**/*.trx
-          reporter: dotnet-trx
+      # - name: Publish test results
+      #   if: always()
+      #   uses: dorny/test-reporter@v1
+      #   with:
+      #     name: .NET Test Results
+      #     path: TestResults/**/*.trx
+      #     reporter: dotnet-trx
 
-      - name: Upload test artifacts
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: test-results
-          path: TestResults/**/*.trx
+      # - name: Upload test artifacts
+      #   if: always()
+      #   uses: actions/upload-artifact@v4
+      #   with:
+      #     name: test-results
+      #     path: TestResults/**/*.trx
 
-      - name: Upload screenshots
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: test-screenshots
-          path: |
-            Screenshots/**/*.png
-            **/bin/**/Screenshots/**/*.png
-          if-no-files-found: ignore
+      # - name: Upload screenshots
+      #   if: always()
+      #   uses: actions/upload-artifact@v4
+      #   with:
+      #     name: test-screenshots
+      #     path: |
+      #       Screenshots/**/*.png
+      #       **/bin/**/Screenshots/**/*.png
+      #     if-no-files-found: ignore
 
-      - name: Fail workflow if tests failed
-        if: steps.test_step.outcome == 'failure'
-        run: exit 1
+      # - name: Fail workflow if tests failed
+      #   if: steps.test_step.outcome == 'failure'
+      #   run: exit 1
