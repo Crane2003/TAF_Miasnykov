@@ -1,0 +1,15 @@
+{
+  "$schema": "https://raw.githubusercontent.com/reportportal/agent-net-nunit/master/src/ReportPortal.NUnitExtension/ReportPortal.config.schema",
+  "enabled": true,
+  "server": {
+    "url": "",
+    "project": "",
+    "apiKey": ""
+  },
+  "launch": {
+    "name": "TAF NUnit Tests",
+    "description": "Automated NUnit test run for TAF",
+    "debugMode": false,
+    "tags": [ "nunit", "taf" ]
+  }
+}

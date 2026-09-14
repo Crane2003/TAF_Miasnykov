@@ -5,6 +5,15 @@ inputs:
   sonar-token:
     description: "SonarCloud authentication token"
     required: true
+  reportportal-url:
+    description: "ReportPortal server endpoint URL"
+    required: false
+  reportportal-project:
+    description: "ReportPortal project name"
+    required: false
+  reportportal-api-key:
+    description: "ReportPortal API key"
+    required: false
 
 runs:
   using: "composite"
@@ -66,6 +75,10 @@ runs:
       id: test_step
       continue-on-error: true
       shell: bash
+      env:
+        Reportportal_Server_Url: ${{ inputs.reportportal-url }}
+        Reportportal_Server_Project: ${{ inputs.reportportal-project }}
+        Reportportal_Server_ApiKey: ${{ inputs.reportportal-api-key }}
       run: dotnet test TAF.slnx --configuration Release --no-build --logger "trx;LogFileName=test-results.trx" --results-directory ./TestResults --collect:"XPlat Code Coverage" -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover
 
     - name: End SonarCloud analysis

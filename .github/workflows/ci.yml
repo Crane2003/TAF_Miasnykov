@@ -42,3 +42,6 @@ jobs:
         uses: ./iac/pipelines/build-and-test
         with:
           sonar-token: ${{ secrets.SONAR_TOKEN }}
+          reportportal-url: ${{ vars.TEST_BASE_URL }}
+          reportportal-project: ${{ vars.TEST_PROJECT_NAME }}
+          reportportal-api-key: ${{ secrets.API_AUTH_TOKEN }}
