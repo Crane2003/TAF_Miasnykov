@@ -18,38 +18,54 @@ public class UiOnlyReportPortalFilter : ITestEventListener
 {
     private const string UiNamespacePrefix = "Tests.E2E.";
     private static readonly ILogger Logger = Log.ForContext<UiOnlyReportPortalFilter>();
+    private static bool _extensionLoaded = false;
+
+    static UiOnlyReportPortalFilter()
+    {
+        _extensionLoaded = true;
+        Log.Information("============ UiOnlyReportPortalFilter STATIC CTOR CALLED ============");
+    }
 
     public UiOnlyReportPortalFilter()
     {
-        Logger.Information("UiOnlyReportPortalFilter: Initializing extension");
-        ReportPortalListener.BeforeTestStarted += ReportPortalListener_BeforeTestStarted;
-        ReportPortalListener.BeforeTestFinished += ReportPortalListener_BeforeTestFinished;
-        Logger.Information("UiOnlyReportPortalFilter: Event handlers registered");
+        Log.Information("============ UiOnlyReportPortalFilter INSTANCE CREATED ============");
+        Log.Information("UiOnlyReportPortalFilter: Initializing extension");
+
+        try
+        {
+            ReportPortalListener.BeforeTestStarted += ReportPortalListener_BeforeTestStarted;
+            ReportPortalListener.BeforeTestFinished += ReportPortalListener_BeforeTestFinished;
+            Log.Information("============ UiOnlyReportPortalFilter: Event handlers REGISTERED ============");
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "============ UiOnlyReportPortalFilter: FAILED to register event handlers ============");
+        }
     }
 
     private void ReportPortalListener_BeforeTestStarted(object sender, ReportPortal.NUnitExtension.EventArguments.TestItemStartedEventArgs e)
     {
         var isUiTest = IsUiTest(e.Report);
-        Logger.Information("BeforeTestStarted: Report={Report}, IsUiTest={IsUiTest}, Canceled will be set to {ShouldCancel}",
-            e.Report?.Substring(0, Math.Min(100, e.Report?.Length ?? 0)), isUiTest, !isUiTest);
+        Log.Information("============ BeforeTestStarted: IsUiTest={IsUiTest}, Report substring: {Report} ============",
+            isUiTest, e.Report?.Substring(0, Math.Min(200, e.Report?.Length ?? 0)));
 
         if (!isUiTest)
         {
             e.Canceled = true;
-            Logger.Information("BeforeTestStarted: Canceled=true for non-UI test");
+            Log.Warning("============ BeforeTestStarted: CANCELED non-UI test ============");
         }
     }
 
     private void ReportPortalListener_BeforeTestFinished(object sender, ReportPortal.NUnitExtension.EventArguments.TestItemFinishedEventArgs e)
     {
         var isUiTest = IsUiTest(e.Report);
-        Logger.Information("BeforeTestFinished: Report={Report}, IsUiTest={IsUiTest}, Canceled will be set to {ShouldCancel}",
-            e.Report?.Substring(0, Math.Min(100, e.Report?.Length ?? 0)), isUiTest, !isUiTest);
+        Log.Information("============ BeforeTestFinished: IsUiTest={IsUiTest}, Report substring: {Report} ============",
+            isUiTest, e.Report?.Substring(0, Math.Min(200, e.Report?.Length ?? 0)));
 
         if (!isUiTest)
         {
             e.Canceled = true;
-            Logger.Information("BeforeTestFinished: Canceled=true for non-UI test");
+            Log.Warning("============ BeforeTestFinished: CANCELED non-UI test ============");
         }
     }
 
@@ -57,7 +73,7 @@ public class UiOnlyReportPortalFilter : ITestEventListener
     {
         if (string.IsNullOrWhiteSpace(report))
         {
-            Logger.Debug("IsUiTest: Report is null or empty");
+            Log.Debug("IsUiTest: Report is null or empty");
             return false;
         }
 
@@ -66,18 +82,19 @@ public class UiOnlyReportPortalFilter : ITestEventListener
             var element = XElement.Parse(report);
             var fullName = element.Attribute("fullname")?.Value;
             var result = fullName != null && fullName.StartsWith(UiNamespacePrefix, StringComparison.Ordinal);
-            Logger.Debug("IsUiTest: FullName={FullName}, Result={Result}", fullName, result);
+            Log.Information("IsUiTest: FullName={FullName}, Result={Result}, ElementName={ElementName}", 
+                fullName, result, element.Name);
             return result;
         }
         catch (Exception ex)
         {
-            Logger.Error(ex, "IsUiTest: Error parsing XML report");
+            Log.Error(ex, "IsUiTest: Error parsing XML report. Content: {Report}", report);
             return false;
         }
     }
 
     public void OnTestEvent(string report)
     {
-        // NUnit engine callback - not used for filtering
+        Log.Debug("OnTestEvent called with report: {Report}", report?.Substring(0, Math.Min(100, report?.Length ?? 0)));
     }
 }
