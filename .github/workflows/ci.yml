@@ -31,6 +31,10 @@ jobs:
       Credentials__AdminUser__Password: ${{ secrets.ADMIN_USER_PASSWORD }}
       ApiConfiguration__BaseUrl: ${{ vars.API_BASE_URL }}
       ApiConfiguration__AuthToken: ${{ secrets.API_AUTH_TOKEN }}
+      JiraConfiguration__Enabled: ${{ vars.JIRA_ENABLED }}
+      JiraConfiguration__BaseUrl: ${{ vars.JIRA_BASE_URL }}
+      JiraConfiguration__Email: ${{ vars.JIRA_EMAIL }}
+      JiraConfiguration__ApiToken: ${{ secrets.JIRA_API_TOKEN }}
 
     steps:
       - name: Checkout

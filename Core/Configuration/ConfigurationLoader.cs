@@ -39,6 +39,13 @@ public class ConfigurationLoader
         return apiConfig;
     }
 
+    public JiraConfiguration GetJiraConfiguration()
+    {
+        var jiraConfig = new JiraConfiguration();
+        _configuration.GetSection("JiraConfiguration").Bind(jiraConfig);
+        return jiraConfig;
+    }
+
     public T GetSection<T>(string sectionName) where T : new()
     {
         var section = new T();

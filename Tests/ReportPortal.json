@@ -1,6 +1,6 @@
 {
   "$schema": "https://raw.githubusercontent.com/reportportal/agent-net-nunit/master/src/ReportPortal.NUnitExtension/ReportPortal.config.schema",
-  "enabled": true,
+  "enabled": false,
   "server": {
     "url": "",
     "project": "",

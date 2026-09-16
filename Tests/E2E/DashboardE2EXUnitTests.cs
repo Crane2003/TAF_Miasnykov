@@ -86,7 +86,6 @@ public class DashboardE2EXUnitTests : XUnitUiBaseTest, IAsyncLifetime, IClassFix
         {
             _createdDashboardId = null;
         }
-        Assert.Fail("Intentionally failing the test to verify screenshot capture and reporting");
     }
 
     [Fact]
