@@ -22,7 +22,7 @@ public static class DriverFactory
     {
         var options = new ChromeOptions();
 
-        // For CI/Linux environments, specify Chrome binary location
+/*        // For CI/Linux environments, specify Chrome binary location
         var chromePathFromEnv = Environment.GetEnvironmentVariable("CHROME_PATH");
         var chromePaths = new[]
         {
@@ -39,7 +39,7 @@ public static class DriverFactory
                 options.BinaryLocation = path;
                 break;
             }
-        }
+        }*/
 
         options.AddArgument("--start-maximized");
         options.AddArgument("--ignore-certificate-errors");
@@ -51,6 +51,12 @@ public static class DriverFactory
         {
             options.AddArgument("--headless=new");
             options.AddArgument("--window-size=1920,1080");
+        }
+
+        var chromePath = Environment.GetEnvironmentVariable("CHROME_PATH");
+        if (!string.IsNullOrEmpty(chromePath) && File.Exists(chromePath))
+        {
+            options.BinaryLocation = chromePath;
         }
         return new ChromeDriver(options);
     }
