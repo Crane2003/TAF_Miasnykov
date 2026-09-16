@@ -1,3 +1,4 @@
+using ReportPortal.Serilog;
 using Serilog.Events;
 
 namespace Core.Logging;
@@ -21,6 +22,7 @@ public static class LoggerSetup
                 rollingInterval: RollingInterval.Day,
                 outputTemplate: "[{Timestamp:yyyy-MM-dd HH:mm:ss.fff} {Level:u3}] [{SourceContext}] {Message:lj}{NewLine}{Exception}",
                 retainedFileCountLimit: 7)
+            .WriteTo.ReportPortal()
             .CreateLogger();
 
         AppDomain.CurrentDomain.ProcessExit += (_, _) => Log.CloseAndFlush();
