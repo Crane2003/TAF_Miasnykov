@@ -53,13 +53,16 @@ public class WidgetCard
         _logger.Information("Removing widget {WidgetName}", _widgetName);
         RemoveButton.Click();
 
-        var deleteModal = new BaseElement(_driver, DeleteWidgetModalLocator, timeoutInSeconds: 3);
-        if (!deleteModal.IsDisplayed())
+        try
+        {
+            WaitHelper.WaitForElementVisible(_driver, DeleteWidgetModalLocator, timeoutInSeconds: 10);
+        }
+        catch (WebDriverTimeoutException)
         {
             throw new WebDriverTimeoutException("Delete widget confirmation modal did not appear in time.");
         }
 
-        new Button(_driver, DeleteWidgetConfirmButtonLocator, timeoutInSeconds: 3).Click();
+        new Button(_driver, DeleteWidgetConfirmButtonLocator, timeoutInSeconds: 10).Click();
         WaitHelper.WaitForElementInvisible(_driver, CardLocator, timeoutInSeconds: 5);
     }
 

@@ -1,5 +1,6 @@
 using Business.Models;
 using Business.Services;
+using Core.Jira;
 using Core.Utilities;
 using Tests.Base;
 
@@ -33,6 +34,7 @@ public class DashboardE2ETests : UiBaseTest
     }
 
     [Test]
+    [JiraTestCase("SCRUM-5")]
     public async Task User_ShouldBeAbleToCreateDashboardViaUi()
     {
         var dashboardName = "E2E Dashboard".Unique();
@@ -46,6 +48,7 @@ public class DashboardE2ETests : UiBaseTest
     }
 
     [Test]
+    [JiraTestCase("SCRUM-6")]
     public async Task User_ShouldBeAbleToRemoveDashboardViaUi()
     {
         var dashboardName = "E2E Dashboard".Unique();
@@ -66,9 +69,11 @@ public class DashboardE2ETests : UiBaseTest
         {
             _createdDashboardId = null;
         }
+        Assert.Fail("Intentionally failing the test to verify screenshot capture and reporting");
     }
 
     [Test]
+    [JiraTestCase("SCRUM-7")]
     public async Task User_ShouldBeAbleToEditDashboardViaUi()
     {
         var dashboardName = "E2E Dashboard".Unique();
