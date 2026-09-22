@@ -5,66 +5,95 @@ namespace Business.Services;
 
 public class DashboardUiService
 {
-    private readonly DashboardPage _dashboardPage;
+    private readonly DashboardHomePage _dashboardHomePage;
+    private readonly DashboardDetailsPage _dashboardDetailsPage;
 
     public DashboardUiService(string baseUrl)
     {
         var driver = DriverManager.Driver;
-        _dashboardPage = new DashboardPage(driver, baseUrl);
+        _dashboardHomePage = new DashboardHomePage(driver, baseUrl);
+        _dashboardDetailsPage = new DashboardDetailsPage(driver, baseUrl);
     }
 
     public void NavigateToDashboards()
     {
-        _dashboardPage.Open();
+        _dashboardHomePage.NavigateViaSidebar();
     }
 
-    public void ClickAddNewDashboard()
+    public void CreateDashboard(string name, string? description = null)
     {
-        _dashboardPage.ClickAddNewDashboard();
+        _dashboardHomePage.CreateDashboard(name, description);
     }
 
-    public void ClickAddNewWidget()
+    public AddDashboardModal GetAddDashboardModal()
     {
-        _dashboardPage.ClickAddNewWidget();
+        return _dashboardHomePage.GetAddDashboardModal();
+    }
+
+    public void AddWidget(
+        string widgetTypeValue,
+        string widgetName,
+        string? widgetDescription = null,
+        string? itemsCount = null,
+        bool useLatestLaunches = false)
+    {
+        _dashboardDetailsPage.AddWidget(widgetTypeValue, widgetName, widgetDescription, itemsCount, useLatestLaunches);
     }
 
     public void ClickEdit()
     {
-        _dashboardPage.ClickEdit();
+        _dashboardDetailsPage.ClickEdit();
     }
 
     public void ClickDelete()
     {
-        _dashboardPage.ClickDelete();
+        _dashboardDetailsPage.ClickDelete();
     }
 
-    public void ClickFullScreen()
+    public bool IsDashboardNameVisibleOnHomePage(string dashboardName)
     {
-        _dashboardPage.ClickFullScreen();
+        return _dashboardHomePage.IsDashboardNameVisible(dashboardName);
     }
 
-    public string GetDashboardTitle()
+    public bool IsDashboardNameVisibleOnDetailsPage(string dashboardName)
     {
-        return _dashboardPage.GetDashboardTitle();
-    }
-
-    public bool IsAddNewDashboardButtonVisible()
-    {
-        return _dashboardPage.IsAddNewDashboardButtonDisplayed();
-    }
-
-    public bool IsAddNewWidgetButtonVisible()
-    {
-        return _dashboardPage.IsAddNewWidgetButtonDisplayed();
-    }
-
-    public bool IsPageLoaded()
-    {
-        return _dashboardPage.IsPageLoaded();
+        return _dashboardDetailsPage.IsDashboardNameVisible(dashboardName);
     }
 
     public bool IsDashboardNameVisible(string dashboardName)
     {
-        return _dashboardPage.IsDashboardNameVisible(dashboardName);
+        return _dashboardDetailsPage.IsPageLoaded()
+            ? IsDashboardNameVisibleOnDetailsPage(dashboardName)
+            : IsDashboardNameVisibleOnHomePage(dashboardName);
+    }
+
+    public void OpenDashboard(string name)
+    {
+        _dashboardHomePage.OpenDashboard(name);
+    }
+
+    public bool IsWidgetDisplayed(string widgetName)
+    {
+        return _dashboardDetailsPage.IsWidgetDisplayed(widgetName);
+    }
+
+    public void ReorderWidgets(string sourceWidgetName, string targetWidgetName)
+    {
+        _dashboardDetailsPage.ReorderWidgets(sourceWidgetName, targetWidgetName);
+    }
+
+    public bool IsWidgetBefore(string firstWidgetName, string secondWidgetName)
+    {
+        return _dashboardDetailsPage.IsWidgetBefore(firstWidgetName, secondWidgetName);
+    }
+
+    public bool WaitUntilWidgetIsBefore(string firstWidgetName, string secondWidgetName, int timeoutInSeconds = 5)
+    {
+        return _dashboardDetailsPage.WaitUntilWidgetIsBefore(firstWidgetName, secondWidgetName, timeoutInSeconds);
+    }
+
+    public void RemoveWidget(string widgetName)
+    {
+        _dashboardDetailsPage.RemoveWidget(widgetName);
     }
 }

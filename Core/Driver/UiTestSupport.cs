@@ -17,7 +17,7 @@ public static class UiTestSupport
     }
 
     public static void QuitWithScreenshot(
-        IWebDriver driver,
+        IWebDriver? driver,
         string testName,
         bool testFailed,
         bool takeScreenshotOnFailure,
@@ -25,7 +25,7 @@ public static class UiTestSupport
     {
         try
         {
-            if (takeScreenshotOnFailure && testFailed)
+            if (takeScreenshotOnFailure && testFailed && driver is not null)
             {
                 try
                 {
@@ -40,6 +40,15 @@ public static class UiTestSupport
         }
         finally
         {
+            try
+            {
+                driver?.Quit();
+            }
+            catch (Exception ex)
+            {
+                logger.Warning(ex, "Error while quitting WebDriver instance directly");
+            }
+
             DriverManager.QuitDriver();
             logger.Information("WebDriver quit");
         }

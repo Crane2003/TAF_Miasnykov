@@ -22,6 +22,8 @@ public static class DriverFactory
     {
         var options = new ChromeOptions();
         options.AddArgument("--start-maximized");
+        options.AddArgument("--ignore-certificate-errors");
+        options.AcceptInsecureCertificates = true;
         if (headless)
         {
             options.AddArgument("--headless=new");
@@ -34,6 +36,7 @@ public static class DriverFactory
     {
         var options = new FirefoxOptions();
         options.AddArgument("--start-maximized");
+        options.AcceptInsecureCertificates = true;
         if (headless)
             options.AddArgument("--headless");
         return new FirefoxDriver(options);
@@ -43,6 +46,8 @@ public static class DriverFactory
     {
         var options = new EdgeOptions();
         options.AddArgument("--start-maximized");
+        options.AddArgument("--ignore-certificate-errors");
+        options.AcceptInsecureCertificates = true;
         if (headless)
         {
             options.AddArgument("--headless=new");

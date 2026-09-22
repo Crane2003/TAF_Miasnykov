@@ -2,7 +2,6 @@ using System.Net;
 using System.Text.Json;
 using Business.Models;
 using Core.Api;
-using RestSharp;
 
 namespace Business.Services;
 
@@ -21,6 +20,8 @@ public class DashboardApiService
     // Parallel fixtures can hit a transient backend locking error; the same payload succeeds on retry.
     private const int MaxWriteAttempts = 2;
     private const int ConcurrencyRetryDelayMs = 250;
+    private const int MaxDashboardLookupAttempts = 5;
+    private const int DashboardLookupRetryDelayMs = 300;
 
     public DashboardApiService(string projectName)
     {
@@ -251,18 +252,70 @@ public class DashboardApiService
     {
         try
         {
-            var response = await _apiClient.ExecuteDeleteAsync(_endpoints.Dashboard(dashboardId));
+            for (var attempt = 1; ; attempt++)
+            {
+                var response = await _apiClient.ExecuteDeleteAsync(_endpoints.Dashboard(dashboardId));
 
-            if (response.IsSuccessful)
-                return true;
+                if (response.IsSuccessful)
+                    return true;
 
-            _logger.Warning("Failed to delete dashboard {DashboardId}. Status: {StatusCode}", dashboardId, (int)response.StatusCode);
-            return false;
+                if (IsTransientConcurrencyFailure(response) && attempt < MaxWriteAttempts)
+                {
+                    _logger.Warning("Dashboard delete hit transient backend locking error on attempt {Attempt}; retrying.", attempt);
+                    await Task.Delay(ConcurrencyRetryDelayMs);
+                    continue;
+                }
+
+                _logger.Warning("Failed to delete dashboard {DashboardId}. Status: {StatusCode}", dashboardId, (int)response.StatusCode);
+                return false;
+            }
         }
         catch (Exception ex)
         {
             _logger.Error(ex, "Exception occurred while deleting dashboard {DashboardId}", dashboardId);
             return false;
+        }
+    }
+
+    public async Task<int?> GetDashboardIdByNameAsync(string dashboardName)
+    {
+        try
+        {
+            _logger.Debug("Looking up dashboard id by name: {DashboardName}", dashboardName);
+            var encodedName = Uri.EscapeDataString(dashboardName);
+
+            for (var attempt = 1; attempt <= MaxDashboardLookupAttempts; attempt++)
+            {
+                var response = await _apiClient.ExecuteGetAsync($"{_endpoints.Dashboards}?filter.eq.name={encodedName}");
+
+                if (response.IsSuccessful && !string.IsNullOrWhiteSpace(response.Content))
+                {
+                    using var document = JsonDocument.Parse(response.Content);
+                    if (document.RootElement.TryGetProperty("content", out var content)
+                        && content.ValueKind == JsonValueKind.Array
+                        && content.GetArrayLength() > 0)
+                    {
+                        var first = content[0];
+                        if (first.TryGetProperty("id", out var idProperty))
+                            return idProperty.GetInt32();
+                    }
+                }
+                else
+                {
+                    _logger.Warning("Failed to load dashboards for lookup on attempt {Attempt}. Status: {StatusCode}", attempt, (int)response.StatusCode);
+                }
+
+                if (attempt < MaxDashboardLookupAttempts)
+                    await Task.Delay(DashboardLookupRetryDelayMs);
+            }
+
+            _logger.Warning("Dashboard id lookup by name failed after {Attempts} attempts: {DashboardName}", MaxDashboardLookupAttempts, dashboardName);
+            return null;
+        }
+        catch (Exception ex)
+        {
+            _logger.Error(ex, "Exception occurred while resolving dashboard id for {DashboardName}", dashboardName);
+            return null;
         }
     }
 
